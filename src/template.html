@@ -207,15 +207,8 @@ section { padding-block: clamp(64px, 9vw, 112px); }
 .spec p { color: var(--muted); font-size: .97rem; margin-top: 4px; }
 .spec .where { display: inline-block; margin-top: 8px; font: 500 .74rem/1 var(--font-label); letter-spacing: .08em; text-transform: uppercase; color: var(--rust); }
 
-.spec-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 14px; margin-top: 8px; }
-.spec .spec-foot .where { margin-top: 0; }
-.seen { display: inline-flex; align-items: center; gap: 6px; font: 500 .8rem var(--font-label); color: var(--muted); cursor: pointer; }
-.seen input { width: 18px; height: 18px; margin: 0; accent-color: var(--moss); cursor: pointer; }
-.spec.is-seen .spec-photo { outline: 3px solid var(--moss); outline-offset: 2px; }
-.spec.is-seen .seen { color: var(--moss); }
 .guide-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-top: 34px; padding: 18px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
-.seen-count { color: var(--muted); max-width: 48ch; }
-.seen-count b { color: var(--fg); }
+.guide-note { color: var(--muted); max-width: 52ch; }
 .dl-meta { font: 600 .7rem var(--font-label); letter-spacing: .08em; padding: 2px 6px; border: 1px solid currentColor; border-radius: 3px; }
 .photo-credits { margin-top: 18px; font: 500 .74rem/1.5 var(--font-label); color: var(--muted); }
 .photo-credits summary { cursor: pointer; }
@@ -556,29 +549,29 @@ footer .coords { font: 400 .8rem var(--font-label); letter-spacing: .08em; }
         <div class="guide-col">
           <h3>Fauna</h3>
           <ul class="species">
-          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/bearded-vulture}}" alt="Bearded vulture" loading="lazy"><div><h4>Bearded vulture <i>Gypaetus barbatus</i></h4><p>One of Africa’s rarest raptors. Southern Africa’s only population lives in these mountains, gliding along the escarpment.</p><div class="spec-foot"><span class="where">Cliffs · all year</span><label class="seen"><input type="checkbox" data-seen="bearded-vulture"> Seen it</label></div></div></li>
-          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/cape-vulture}}" alt="Cape vulture" loading="lazy"><div><h4>Cape vulture <i>Gyps coprotheres</i></h4><p>Breeds in colonies on the high sandstone cliffs and rides the thermals over the foothills.</p><div class="spec-foot"><span class="where">Cliffs · all year</span><label class="seen"><input type="checkbox" data-seen="cape-vulture"> Seen it</label></div></div></li>
-          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/wattled-crane}}" alt="Wattled crane" loading="lazy"><div><h4>Wattled crane <i>Bugeranus carunculatus</i></h4><p>South Africa’s rarest crane. The highland wetlands of this district are among its last strongholds.</p><div class="spec-foot"><span class="where">Wetlands · all year</span><label class="seen"><input type="checkbox" data-seen="wattled-crane"> Seen it</label></div></div></li>
-          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/bald-ibis}}" alt="Southern bald ibis" loading="lazy"><div><h4>Southern bald ibis <i>Geronticus calvus</i></h4><p>A glossy ibis with a red crown, feeding in short, freshly burnt grassland.</p><div class="spec-foot"><span class="where">Grassland · winter and spring</span><label class="seen"><input type="checkbox" data-seen="bald-ibis"> Seen it</label></div></div></li>
-          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/eland}}" alt="Eland" loading="lazy"><div><h4>Eland <i>Taurotragus oryx</i></h4><p>Africa’s largest antelope, and the animal the San painted most often on the rock shelters of the Berg.</p><div class="spec-foot"><span class="where">Foothills · all year</span><label class="seen"><input type="checkbox" data-seen="eland"> Seen it</label></div></div></li>
-          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/grey-rhebok}}" alt="Grey rhebok" loading="lazy"><div><h4>Grey rhebok <i>Pelea capreolus</i></h4><p>A woolly-coated antelope of the high grassland, usually seen in small groups on open slopes.</p><div class="spec-foot"><span class="where">High grassland · all year</span><label class="seen"><input type="checkbox" data-seen="grey-rhebok"> Seen it</label></div></div></li>
+          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/bearded-vulture}}" alt="Bearded vulture" loading="lazy"><div><h4>Bearded vulture <i>Gypaetus barbatus</i></h4><p>One of Africa’s rarest raptors. Southern Africa’s only population lives in these mountains, gliding along the escarpment.</p><span class="where">Cliffs · all year</span></div></li>
+          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/cape-vulture}}" alt="Cape vulture" loading="lazy"><div><h4>Cape vulture <i>Gyps coprotheres</i></h4><p>Breeds in colonies on the high sandstone cliffs and rides the thermals over the foothills.</p><span class="where">Cliffs · all year</span></div></li>
+          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/wattled-crane}}" alt="Wattled crane" loading="lazy"><div><h4>Wattled crane <i>Bugeranus carunculatus</i></h4><p>South Africa’s rarest crane. The highland wetlands of this district are among its last strongholds.</p><span class="where">Wetlands · all year</span></div></li>
+          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/bald-ibis}}" alt="Southern bald ibis" loading="lazy"><div><h4>Southern bald ibis <i>Geronticus calvus</i></h4><p>A glossy ibis with a red crown, feeding in short, freshly burnt grassland.</p><span class="where">Grassland · winter and spring</span></div></li>
+          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/eland}}" alt="Eland" loading="lazy"><div><h4>Eland <i>Taurotragus oryx</i></h4><p>Africa’s largest antelope, and the animal the San painted most often on the rock shelters of the Berg.</p><span class="where">Foothills · all year</span></div></li>
+          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/grey-rhebok}}" alt="Grey rhebok" loading="lazy"><div><h4>Grey rhebok <i>Pelea capreolus</i></h4><p>A woolly-coated antelope of the high grassland, usually seen in small groups on open slopes.</p><span class="where">High grassland · all year</span></div></li>
           </ul>
         </div>
         <div class="guide-col">
           <h3>Flora</h3>
           <ul class="species">
-          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/sugarbush}}" alt="Common sugarbush" loading="lazy"><div><h4>Common sugarbush <i>Protea caffra</i></h4><p>Gnarled protea trees scattered across the rocky hillsides, with pale pink flower heads that draw sugarbirds.</p><div class="spec-foot"><span class="where">Rocky slopes · summer</span><label class="seen"><input type="checkbox" data-seen="sugarbush"> Seen it</label></div></div></li>
-          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/red-hot-poker}}" alt="Red-hot poker" loading="lazy"><div><h4>Red-hot poker <i>Kniphofia</i></h4><p>Flame-coloured spikes along streams and on damp slopes.</p><div class="spec-foot"><span class="where">Streams and seeps · summer</span><label class="seen"><input type="checkbox" data-seen="red-hot-poker"> Seen it</label></div></div></li>
-          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/agapanthus}}" alt="Agapanthus" loading="lazy"><div><h4>Agapanthus <i>Agapanthus campanulatus</i></h4><p>Round blue heads on the grassland slopes, and a staple of the gardens along the lane.</p><div class="spec-foot"><span class="where">Grassland · summer</span><label class="seen"><input type="checkbox" data-seen="agapanthus"> Seen it</label></div></div></li>
-          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/fire-lily}}" alt="Fire lily" loading="lazy"><div><h4>Fire lily <i>Cyrtanthus</i></h4><p>Bright red trumpets that push up through the blackened ground soon after a veld burn.</p><div class="spec-foot"><span class="where">Burnt veld · spring</span><label class="seen"><input type="checkbox" data-seen="fire-lily"> Seen it</label></div></div></li>
-          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/everlasting}}" alt="Everlastings" loading="lazy"><div><h4>Everlastings <i>Helichrysum</i></h4><p>Papery silver and gold flowers. The Drakensberg has dozens of species.</p><div class="spec-foot"><span class="where">Grassland · summer and autumn</span><label class="seen"><input type="checkbox" data-seen="everlasting"> Seen it</label></div></div></li>
-          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/tree-fern}}" alt="Tree fern" loading="lazy"><div><h4>Tree fern <i>Cyathea dregei</i></h4><p>A sturdy grassland tree fern that survives fire, found along stream banks and in moist gullies.</p><div class="spec-foot"><span class="where">Stream banks · all year</span><label class="seen"><input type="checkbox" data-seen="tree-fern"> Seen it</label></div></div></li>
+          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/sugarbush}}" alt="Common sugarbush" loading="lazy"><div><h4>Common sugarbush <i>Protea caffra</i></h4><p>Gnarled protea trees scattered across the rocky hillsides, with pale pink flower heads that draw sugarbirds.</p><span class="where">Rocky slopes · summer</span></div></li>
+          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/red-hot-poker}}" alt="Red-hot poker" loading="lazy"><div><h4>Red-hot poker <i>Kniphofia</i></h4><p>Flame-coloured spikes along streams and on damp slopes.</p><span class="where">Streams and seeps · summer</span></div></li>
+          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/agapanthus}}" alt="Agapanthus" loading="lazy"><div><h4>Agapanthus <i>Agapanthus campanulatus</i></h4><p>Round blue heads on the grassland slopes, and a staple of the gardens along the lane.</p><span class="where">Grassland · summer</span></div></li>
+          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/fire-lily}}" alt="Fire lily" loading="lazy"><div><h4>Fire lily <i>Cyrtanthus</i></h4><p>Bright red trumpets that push up through the blackened ground soon after a veld burn.</p><span class="where">Burnt veld · spring</span></div></li>
+          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/everlasting}}" alt="Everlastings" loading="lazy"><div><h4>Everlastings <i>Helichrysum</i></h4><p>Papery silver and gold flowers. The Drakensberg has dozens of species.</p><span class="where">Grassland · summer and autumn</span></div></li>
+          <li class="spec reveal"><img class="spec-photo" src="{{IMG:species/tree-fern}}" alt="Tree fern" loading="lazy"><div><h4>Tree fern <i>Cyathea dregei</i></h4><p>A sturdy grassland tree fern that survives fire, found along stream banks and in moist gullies.</p><span class="where">Stream banks · all year</span></div></li>
           </ul>
         </div>
       </div>
 
       <div class="guide-foot reveal">
-        <p class="seen-count" id="seenCount" aria-live="polite">Tick the species you spot. Your list is saved on this device.</p>
+        <p class="guide-note">Keeping count? The spotter's checklist has 25 species to tick off, with space to note where and when. Fill it in on your phone or print it for the car.</p>
         <a class="btn btn-map" href="loopy-lane-spotters-checklist.pdf" download>Download the spotter's checklist <span class="dl-meta">PDF</span></a>
       </div>
       <details class="photo-credits"><summary>Photo credits</summary><ul><li>Bearded vulture: <a href="https://commons.wikimedia.org/wiki/File:Bartgeier_Gypaetus_barbatus_closeup1_Richard_Bartz.jpg" target="_blank" rel="noopener">Richard Bartz, Munich aka Makro Freak</a>, <a href="https://creativecommons.org/licenses/by-sa/2.5" target="_blank" rel="noopener">CC BY-SA 2.5</a></li><li>Cape vulture: <a href="https://commons.wikimedia.org/wiki/File:Cape_vulture_2017_08_23_5935.jpg" target="_blank" rel="noopener">Alandmanson</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank" rel="noopener">CC BY-SA 4.0</a></li><li>Wattled crane: <a href="https://commons.wikimedia.org/wiki/File:Bugeranus_carunculatus_-Dierenpark_Amersfoort,_Netherlands-8a.jpg" target="_blank" rel="noopener">Arjan Haverkamp</a>, <a href="https://creativecommons.org/licenses/by/2.0" target="_blank" rel="noopener">CC BY 2.0</a></li><li>Southern bald ibis: <a href="https://commons.wikimedia.org/wiki/File:Threskiornithidae_Geronticus_calvus_1.1.jpg" target="_blank" rel="noopener">NasserHalaweh</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank" rel="noopener">CC BY-SA 4.0</a></li><li>Eland: <a href="https://commons.wikimedia.org/wiki/File:Taurotragus_oryx_qtl2.jpg" target="_blank" rel="noopener">Quartl</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0" target="_blank" rel="noopener">CC BY-SA 3.0</a></li><li>Grey rhebok: <a href="https://commons.wikimedia.org/wiki/File:Grey_Rhebok_(Pelea_capreolus)_(32453042900).jpg" target="_blank" rel="noopener">Bernard DUPONT from FRANCE</a>, <a href="https://creativecommons.org/licenses/by-sa/2.0" target="_blank" rel="noopener">CC BY-SA 2.0</a></li><li>Common sugarbush: <a href="https://commons.wikimedia.org/wiki/File:Protea_caffra_caffra_109322728.jpg" target="_blank" rel="noopener">Suvarna Parbhoo Mohan</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank" rel="noopener">CC BY-SA 4.0</a></li><li>Red-hot poker: <a href="https://commons.wikimedia.org/wiki/File:00_3464_Fackellilie_(Kniphofia_caulescens).jpg" target="_blank" rel="noopener">W. Bulach</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank" rel="noopener">CC BY-SA 4.0</a></li><li>Agapanthus: <a href="https://commons.wikimedia.org/wiki/File:CampanulaenTandil-dec2014.jpg" target="_blank" rel="noopener">Ezarate</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank" rel="noopener">CC BY-SA 4.0</a></li><li>Fire lily: <a href="https://commons.wikimedia.org/wiki/File:Cyrtanthus_contractus_1DS-II_4-0008.jpg" target="_blank" rel="noopener">SAplants</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank" rel="noopener">CC BY-SA 4.0</a></li><li>Everlastings: <a href="https://commons.wikimedia.org/wiki/File:Helichrysum_ecklonis,_RBGE_2010.jpg" target="_blank" rel="noopener">Lokal_Profil</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0" target="_blank" rel="noopener">CC BY-SA 3.0</a></li><li>Tree fern: <a href="https://commons.wikimedia.org/wiki/File:Cyathea_dregei,_Kirstenbosch.jpg" target="_blank" rel="noopener">Karen Wiebe</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0" target="_blank" rel="noopener">CC BY-SA 3.0</a></li></ul></details>
@@ -888,26 +881,6 @@ footer .coords { font: 400 .8rem var(--font-label); letter-spacing: .08em; }
     });
     if (PLACES[current].pin.hidden) { const first = PLACES.find(p => !p.pin.hidden); if (first) select(first.i); }
   }));
-
-  // Flora and fauna: "Seen it" ticks, remembered on this device only
-  const seenBoxes = [...document.querySelectorAll('[data-seen]')];
-  const seenCount = document.getElementById('seenCount');
-  let seen = [];
-  try { seen = JSON.parse(localStorage.getItem('loopylane-seen') || '[]'); } catch (e) { seen = []; }
-  const showSeen = () => {
-    seenBoxes.forEach(b => b.closest('.spec').classList.toggle('is-seen', b.checked));
-    const n = seenBoxes.filter(b => b.checked).length;
-    seenCount.innerHTML = n ? `<b>${n} of ${seenBoxes.length}</b> spotted so far. Your list is saved on this device.` : 'Tick the species you spot. Your list is saved on this device.';
-  };
-  seenBoxes.forEach(b => {
-    b.checked = seen.includes(b.dataset.seen);
-    b.addEventListener('change', () => {
-      seen = seenBoxes.filter(x => x.checked).map(x => x.dataset.seen);
-      try { localStorage.setItem('loopylane-seen', JSON.stringify(seen)); } catch (e) {}
-      showSeen();
-    });
-  });
-  showSeen();
 
   // Season tabs
   const tabs = document.querySelectorAll('[role="tab"]');
