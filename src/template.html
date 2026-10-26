@@ -66,7 +66,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .nav-logo { display: block; width: 116px; aspect-ratio: 606 / 181; background: var(--paper);
   -webkit-mask: url("{{LOGO}}") center / contain no-repeat; mask: url("{{LOGO}}") center / contain no-repeat; }
 .nav ul { display: flex; gap: clamp(10px, 2vw, 26px); list-style: none; margin: 0; padding: 0; }
-.nav ul a { display: block; padding-block: 6px; border-bottom: 2px solid transparent; font: 500 1rem var(--font-body); text-decoration: none; color: var(--cream); opacity: .88; transition: border-color .2s, opacity .2s; }
+.nav ul a { display: block; padding-block: 4px; border-bottom: 2px solid transparent; font: 700 1rem/1.4 var(--font-label); letter-spacing: .01em; text-decoration: none; color: var(--cream); opacity: .88; transition: border-color .2s, opacity .2s; }
 .nav ul a:hover { opacity: 1; border-color: var(--mustard); }
 @media (max-width: 720px) { .nav ul li:nth-child(n+4) { display: none; } .nav ul a { font-size: .95rem; } }
 
@@ -91,8 +91,23 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 @keyframes pop { from { transform: scale(.85); opacity: 0; } }
 .d1 { animation-delay: 4.2s; } .d2 { animation-delay: 4.5s; }
 
-/* To-do list on a notepad */
-.todo-band { background: var(--lawn); }
+/* To-do list: a floating bubble that opens a notepad */
+.todo-bubble { position: fixed; right: max(18px, env(safe-area-inset-right, 0px)); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 1200;
+  width: 62px; height: 62px; border: 0; border-radius: 50%; background: var(--mustard); color: var(--paper); cursor: pointer; display: grid; place-items: center;
+  box-shadow: 0 5px 0 var(--mustard-2); transition: transform .25s cubic-bezier(.3,1.5,.5,1), box-shadow .08s, opacity .2s; }
+.todo-bubble svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.todo-bubble:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--mustard-2); }
+.todo-bubble.away { transform: scale(0); opacity: 0; pointer-events: none; }
+.todo-bubble[aria-expanded="true"] { background: var(--pine-2); box-shadow: 0 5px 0 var(--pine-3); }
+.todo-count { position: absolute; top: -6px; right: -8px; min-width: 30px; padding: 2px 7px; border-radius: 999px; background: var(--pine); color: var(--paper); font: 800 .72rem/1.4 var(--font-label); box-shadow: 0 2px 0 var(--pine-3); }
+.todo-pop { position: fixed; right: max(18px, env(safe-area-inset-right, 0px)); bottom: calc(96px + env(safe-area-inset-bottom, 0px)); z-index: 1200;
+  width: min(400px, calc(100vw - 32px)); max-height: calc(100vh - 150px); overflow-y: auto; border-radius: 16px; box-shadow: 0 10px 0 rgba(29,51,34,.35);
+  transform-origin: 90% 100%; animation: pop .35s cubic-bezier(.3,1.4,.5,1) both; }
+.todo-pop[hidden] { display: none; }
+.todo-pop .notepad { transform: none; max-width: none; margin: 0; box-shadow: none; padding: 58px 26px 26px 60px; }
+.todo-close { position: absolute; top: 32px; right: 12px; z-index: 1; width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--cream); color: var(--ink); font: 700 1.3rem/1 var(--font-label); cursor: pointer; }
+.todo-close:hover { background: var(--line); }
+@media (max-width: 520px) { .todo-pop { right: 12px; left: 12px; width: auto; } .todo-pop .notepad { padding: 56px 14px 22px 48px; } }
 .notepad { position: relative; max-width: 560px; margin: 0 auto; background: var(--paper); border-radius: 8px 8px 16px 16px; padding: 64px 34px 38px 66px;
   box-shadow: 0 10px 0 var(--hedge-2); transform: rotate(-1.2deg);
   background-image: linear-gradient(transparent 0 46px, var(--line) 46px 48px); background-size: 100% 48px; background-position: 0 58px; }
@@ -240,7 +255,6 @@ footer details ul { text-align: left; columns: 2 280px; margin: 10px 0 0; paddin
     <a href="#top" aria-label="Loopy Lane home"><span class="nav-logo" role="img" aria-label="Loopy Lane"></span></a>
     <ul>
       <li><a href="#map">Map</a></li>
-      <li><a href="#todo">To do</a></li>
       <li><a href="#explore">Explore</a></li>
       <li><a href="#nature">Nature</a></li>
       <li><a href="#history">History</a></li>
@@ -356,34 +370,12 @@ footer details ul { text-align: left; columns: 2 280px; margin: 10px 0 0; paddin
     <p class="tag pop d1">Farms, cottages, gardens and big mountain views, just outside Underberg.</p>
     <div class="cta pop d2">
       <a class="btn" href="#map">Walk the map</a>
-      <a class="btn btn-mustard" href="#todo">The to-do list</a>
+      <button class="btn btn-mustard" type="button" data-open-todo>The to-do list</button>
     </div>
   </div>
 </header>
 
 <main>
-  <!-- TO DO -->
-  <section class="todo-band" id="todo">
-    <div class="wrap">
-      <div class="notepad reveal">
-        <h2>Loopy Lane to-do list</h2>
-        <ul class="todo" id="todoList">
-          <li><button type="button" data-k="loop" aria-pressed="false"><span>Drive the whole loop<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
-          <li><button type="button" data-k="crane" aria-pressed="false"><span>Spot a wattled crane<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
-          <li><button type="button" data-k="garden" aria-pressed="false"><span>See an open garden in November<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
-          <li><button type="button" data-k="pig" aria-pressed="false"><span>Lunch at the Pig and Pony<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
-          <li><button type="button" data-k="glider" aria-pressed="false"><span>Watch the gliders take off<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
-          <li><button type="button" data-k="trout" aria-pressed="false"><span>Catch a trout<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
-          <li><button type="button" data-k="sani" aria-pressed="false"><span>Drive up Sani Pass<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
-          <li><button type="button" data-k="hairpins" aria-pressed="false"><span>Fit every hairpin in one photo<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
-          <li><button type="button" data-k="firelily" aria-pressed="false"><span>Find a fire lily after a burn<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
-          <li><button type="button" data-k="checklist" aria-pressed="false"><span>Get the <a href="loopy-lane-spotters-checklist.pdf" download>spotter's checklist</a><svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
-        </ul>
-        <p class="todo-done" id="todoDone" aria-live="polite"></p>
-      </div>
-    </div>
-  </section>
-
   <!-- MAP -->
   <section class="map-band" id="map">
     <div class="wrap">
@@ -515,6 +507,31 @@ footer details ul { text-align: left; columns: 2 280px; margin: 10px 0 0; paddin
   </div>
 </footer>
 
+<!-- The to-do list: an extra, kept in a floating notepad bubble -->
+<button class="todo-bubble" id="todoBubble" type="button" aria-expanded="false" aria-controls="todoPop" aria-label="Open the Loopy Lane to-do list">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M8 4V2.5M12 4V2.5M16 4V2.5M8.5 10h7M8.5 13.5h7M8.5 17h4"/></svg>
+  <span class="todo-count" id="todoCount" hidden></span>
+</button>
+<div class="todo-pop" id="todoPop" role="dialog" aria-labelledby="todoTitle" hidden>
+  <div class="notepad">
+    <button class="todo-close" id="todoClose" type="button" aria-label="Close the to-do list">&times;</button>
+    <h2 id="todoTitle">Loopy Lane to-do list</h2>
+        <ul class="todo" id="todoList">
+          <li><button type="button" data-k="loop" aria-pressed="false"><span>Drive the whole loop<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
+          <li><button type="button" data-k="crane" aria-pressed="false"><span>Spot a wattled crane<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
+          <li><button type="button" data-k="garden" aria-pressed="false"><span>See an open garden in November<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
+          <li><button type="button" data-k="pig" aria-pressed="false"><span>Lunch at the Pig and Pony<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
+          <li><button type="button" data-k="glider" aria-pressed="false"><span>Watch the gliders take off<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
+          <li><button type="button" data-k="trout" aria-pressed="false"><span>Catch a trout<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
+          <li><button type="button" data-k="sani" aria-pressed="false"><span>Drive up Sani Pass<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
+          <li><button type="button" data-k="hairpins" aria-pressed="false"><span>Fit every hairpin in one photo<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
+          <li><button type="button" data-k="firelily" aria-pressed="false"><span>Find a fire lily after a burn<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
+          <li><button type="button" data-k="checklist" aria-pressed="false"><span>Get the <a href="loopy-lane-spotters-checklist.pdf" download>spotter's checklist</a><svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
+        </ul>
+        <p class="todo-done" id="todoDone" aria-live="polite"></p>
+      </div>
+</div>
+
 <script>
 (() => {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -545,11 +562,13 @@ footer details ul { text-align: left; columns: 2 280px; margin: 10px 0 0; paddin
   // To-do list: tap a task to scribble it out; remembered on this device
   const todos = [...document.querySelectorAll('#todoList button')];
   const doneMsg = document.getElementById('todoDone');
+  const todoCount = document.getElementById('todoCount');
   let crossed = [];
   try { crossed = JSON.parse(localStorage.getItem('loopylane-v2-todo') || '[]'); } catch (e) {}
   const tally = () => {
     const n = todos.filter(b => b.getAttribute('aria-pressed') === 'true').length;
     doneMsg.textContent = n === todos.length ? 'All done. Time for a cup of tea.' : n ? `${n} of ${todos.length} done.` : '';
+    todoCount.hidden = !n; todoCount.textContent = `${n}/${todos.length}`;
   };
   todos.forEach(b => {
     b.setAttribute('aria-pressed', crossed.includes(b.dataset.k));
@@ -561,6 +580,22 @@ footer details ul { text-align: left; columns: 2 280px; margin: 10px 0 0; paddin
     });
   });
   tally();
+
+  // The bubble opens and closes the notepad; it waits until the reader has scrolled past the hero
+  const bubble = document.getElementById('todoBubble'), pop = document.getElementById('todoPop');
+  const openTodo = open => {
+    pop.hidden = !open; bubble.setAttribute('aria-expanded', open);
+    if (open) { bubble.classList.remove('away'); (todos.find(b => b.getAttribute('aria-pressed') !== 'true') || todos[0]).focus({ preventScroll: true }); }
+    else placeBubble();
+  };
+  bubble.addEventListener('click', () => openTodo(pop.hidden));
+  document.getElementById('todoClose').addEventListener('click', () => { openTodo(false); bubble.focus(); });
+  document.querySelectorAll('[data-open-todo]').forEach(b => b.addEventListener('click', () => openTodo(true)));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !pop.hidden) { openTodo(false); bubble.focus(); } });
+  document.addEventListener('click', e => { if (!pop.hidden && !pop.contains(e.target) && !bubble.contains(e.target) && !e.target.closest('[data-open-todo]')) openTodo(false); });
+  const heroEnd = document.querySelector('.hero');
+  const placeBubble = () => bubble.classList.toggle('away', pop.hidden && heroEnd.getBoundingClientRect().bottom > innerHeight * .4);
+  addEventListener('scroll', placeBubble, { passive: true }); placeBubble();
 
   // Places (coordinates from each listing on Google Maps)
   const CATS = { stay: 'Stay', camp: 'Camping', eat: 'Eat & drink', do: 'Activities' };
