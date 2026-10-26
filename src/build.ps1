@@ -1,6 +1,6 @@
 # Builds a page by inlining the logo, its pen path, Leaflet's CSS and the photos into a template.
-# Run from anywhere:  powershell -File src\build.ps1                (the main site: template.html -> ../index.html)
-#                     powershell -File src\build.ps1 -Version v2   (the redesign: v2\template.html -> ../v2/index.html)
+# Run from anywhere:  powershell -File src\build.ps1                 (template.html -> ../index.html)
+#                     powershell -File src\build.ps1 -Version <name>  (<name>\template.html -> ../<name>/index.html, for trying out a variant)
 param([string]$Version = '')
 $s = $PSScriptRoot
 $tpl = if ($Version) { "$s\$Version\template.html" } else { "$s\template.html" }
