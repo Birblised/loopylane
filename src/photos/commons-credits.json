@@ -1,0 +1,37 @@
+{
+  "sani": {
+    "title": "File:Sani Pass heading into Lesotho.jpg",
+    "page": "https://commons.wikimedia.org/wiki/File:Sani_Pass_heading_into_Lesotho.jpg",
+    "artist": "Vaiz Ha",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0"
+  },
+  "cranes": {
+    "title": "File:Wattled crane (Grus carunculata) displaying wings.jpg",
+    "page": "https://commons.wikimedia.org/wiki/File:Wattled_crane_(Grus_carunculata)_displaying_wings.jpg",
+    "artist": "Charles J. Sharp",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "autumn": {
+    "title": "File:Early Morning view from Sehlabathebe House - panoramio.jpg",
+    "page": "https://commons.wikimedia.org/wiki/File:Early_Morning_view_from_Sehlabathebe_House_-_panoramio.jpg",
+    "artist": "Graham Maclachlan",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0"
+  },
+  "winter": {
+    "title": "File:Drakkensburg winter.jpg",
+    "page": "https://commons.wikimedia.org/wiki/File:Drakkensburg_winter.jpg",
+    "artist": "GrantsJ1",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "spring": {
+    "title": "File:Protea dracomontana 59376241.jpg",
+    "page": "https://commons.wikimedia.org/wiki/File:Protea_dracomontana_59376241.jpg",
+    "artist": "Peter Warren",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
+  }
+}
