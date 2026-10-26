@@ -8,7 +8,7 @@
 <meta name="description" content="Farms, cottages, gardens and big mountain views along Loopy Lane, Underberg, in the southern Drakensberg.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Patrick+Hand&family=Satisfy&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Patrick+Hand&family=Pacifico&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>{{LEAFLET_CSS}}</style>
 <style>
@@ -26,7 +26,7 @@
   --font-display: "Fredoka", "Nunito", system-ui, sans-serif;
   --font-body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-hand: "Patrick Hand", "Comic Sans MS", cursive;
-  --font-script: "Satisfy", "Brush Script MT", cursive;  /* closest free match to the logo lettering */
+  --font-script: "Pacifico", "Brush Script MT", cursive;  /* rounded script accents to go with the logo */
   --gutter-l: max(16px, env(safe-area-inset-left, 0px));
   --gutter-r: max(16px, env(safe-area-inset-right, 0px));
   color-scheme: light;
@@ -219,12 +219,12 @@ footer details { font: 600 .78rem/1.5 var(--font-body); color: #DCE7CF; max-widt
 footer summary { cursor: pointer; }
 footer details ul { text-align: left; columns: 2 280px; margin: 10px 0 0; padding-left: 18px; }
 
-/* Script accents in the logo's style */
+/* Script accents to go with the logo */
 .notepad h2, .guide-col h3, .season-copy h3 { font-family: var(--font-script); font-weight: 400; letter-spacing: 0; }
-.notepad h2 { font-size: 2.7rem; line-height: 1.1; }
-.guide-col h3 { font-size: 2.5rem; }
-.season-copy h3 { font-size: 2.8rem; line-height: 1.05; }
-@media (max-width: 520px) { .notepad h2 { font-size: 2.2rem; } }
+.notepad h2 { font-size: 2.2rem; line-height: 1.3; }
+.guide-col h3 { font-size: 2.1rem; line-height: 1.3; }
+.season-copy h3 { font-size: 2.3rem; line-height: 1.2; }
+@media (max-width: 520px) { .notepad h2 { font-size: 1.8rem; } }
 
 .reveal.in { animation: pop .5s cubic-bezier(.3,1.4,.5,1) both; }
 @media (prefers-reduced-motion: reduce) {
