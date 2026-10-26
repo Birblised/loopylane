@@ -74,9 +74,16 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .hero { position: relative; background: var(--lawn); overflow: hidden; min-height: clamp(560px, 78vh, 760px); display: grid; place-items: center; padding-block: 48px; }
 .village { position: absolute; inset: 0; width: 100%; height: 100%; }
 .village .car { offset-rotate: auto; }
-.tree { transform-box: fill-box; transform-origin: center; animation: sway 6s ease-in-out infinite alternate; }
-.tree:nth-of-type(3n) { animation-duration: 7.5s; } .tree:nth-of-type(4n) { animation-delay: -2s; }
-@keyframes sway { to { transform: scale(1.04) rotate(2deg); } }
+/* Clouds drift across, slowly change shape, and cast a shadow onto the fields; the pointer nudges each by its depth */
+.sky { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; --px: 0; --py: 0; }
+.cloud { position: absolute; left: 0; top: var(--top); width: var(--w); aspect-ratio: var(--ar); animation: drift var(--dur) linear var(--delay) infinite; }
+.cloud-par { position: absolute; inset: 0; transform: translate(calc(var(--px) * var(--d) * -1px), calc(var(--py) * var(--d) * -.6px)); transition: transform 1.2s cubic-bezier(.2,.8,.2,1); }
+.cloud-body { position: absolute; inset: 0; animation: morph var(--morph) ease-in-out infinite alternate; }
+.cloud-shadow, .cloud-puff { position: absolute; inset: 0; -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
+.cloud-shadow { background: var(--pine); opacity: .2; transform: translate(9%, 16%) scale(.96); }
+.cloud-puff { background: var(--paper); }
+@keyframes drift { 0% { transform: translate(calc(-1 * var(--w) - 40px), 0); } 50% { transform: translate(50vw, 14px); } 100% { transform: translate(calc(100vw + 40px), 0); } }
+@keyframes morph { 0% { transform: scale(1, 1) rotate(0deg); } 50% { transform: scale(1.06, .95) rotate(2deg); } 100% { transform: scale(.95, 1.05) rotate(-2deg); } }
 .sign { position: relative; z-index: 2; width: min(640px, calc(100% - 32px)); background: var(--paper); border-radius: 26px; padding: clamp(24px, 4vw, 40px) clamp(20px, 4vw, 44px) 32px;
   box-shadow: 0 10px 0 var(--hedge-2); display: grid; justify-items: center; gap: 14px; text-align: center; }
 .sign::before, .sign::after { content: ""; position: absolute; top: 100%; width: 16px; height: 46px; background: var(--brick-2); border-radius: 0 0 6px 6px; z-index: -1; }
@@ -264,90 +271,25 @@ footer details ul { text-align: left; columns: 2 280px; margin: 10px 0 0; paddin
 </nav>
 
 <header class="hero" id="top">
-  <!-- The lane from above: patchwork fields, hedgerows, a farm dam and a little car going round the loop -->
-  <svg class="village" viewBox="0 0 1440 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-    <rect width="1440" height="760" fill="var(--lawn)"/>
-    <g stroke="var(--hedge)" stroke-width="12" stroke-linejoin="round">
-      <path d="M0 0 H420 L380 250 L0 300Z" fill="var(--field)"/>
-      <path d="M420 0 H860 L820 190 L380 250Z" fill="var(--wheat)"/>
-      <path d="M860 0 H1440 V230 L1060 260 L820 190Z" fill="var(--lawn-2)"/>
-      <path d="M0 300 L380 250 L330 560 L0 600Z" fill="var(--lawn-2)"/>
-      <path d="M1060 260 L1440 230 V560 L1100 600Z" fill="var(--wheat)"/>
-      <path d="M0 600 L330 560 L420 760 H0Z" fill="var(--wheat)"/>
-      <path d="M330 560 L760 610 L800 760 H420Z" fill="var(--field)"/>
-      <path d="M760 610 L1100 600 L1440 560 V760 H800Z" fill="var(--field)"/>
-    </g>
-    <ellipse cx="1210" cy="420" rx="110" ry="70" fill="var(--pond-2)"/>
-    <ellipse cx="1200" cy="410" rx="92" ry="54" fill="var(--pond)"/>
-    <!-- the lane -->
-    <path id="lane" d="M-40 700 C200 640 260 560 300 470 C350 350 200 300 240 200 C290 80 520 70 560 170 C600 270 470 330 560 400 C660 480 800 380 900 330 C1030 260 1080 120 1200 140 C1330 160 1340 300 1260 330 C1170 360 1020 420 1000 520 C980 640 1200 700 1480 660"
-          fill="none" stroke="var(--cream)" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M-40 700 C200 640 260 560 300 470 C350 350 200 300 240 200 C290 80 520 70 560 170 C600 270 470 330 560 400 C660 480 800 380 900 330 C1030 260 1080 120 1200 140 C1330 160 1340 300 1260 330 C1170 360 1020 420 1000 520 C980 640 1200 700 1480 660"
-          fill="none" stroke="var(--wheat)" stroke-width="3" stroke-dasharray="18 20" stroke-linecap="round"/>
-    <!-- cottages, seen from above -->
-    <g>
-      <rect x="120" y="120" width="70" height="48" rx="4" fill="var(--brick)"/><rect x="120" y="140" width="70" height="8" fill="var(--brick-2)"/>
-      <rect x="640" y="70" width="84" height="54" rx="4" fill="var(--brick)"/><rect x="640" y="93" width="84" height="8" fill="var(--brick-2)"/>
-      <rect x="1080" y="500" width="64" height="46" rx="4" fill="var(--paper)"/><rect x="1080" y="519" width="64" height="8" fill="var(--line)"/>
-      <rect x="420" y="560" width="74" height="50" rx="4" fill="var(--brick)"/><rect x="420" y="581" width="74" height="8" fill="var(--brick-2)"/>
-      <rect x="1310" y="40" width="70" height="48" rx="4" fill="var(--paper)"/><rect x="1310" y="60" width="70" height="8" fill="var(--line)"/>
-    </g>
-    <!-- trees: a flat crown with a darker shadow crown under it -->
-    <g id="trees">
-      <g class="tree"><circle cx="688" cy="180" r="28" fill="var(--hedge-2)"/><circle cx="683" cy="174" r="28" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="1358" cy="75" r="16" fill="var(--hedge-2)"/><circle cx="1353" cy="69" r="16" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="1122" cy="122" r="24" fill="var(--hedge-2)"/><circle cx="1117" cy="116" r="24" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="101" cy="114" r="28" fill="var(--hedge-2)"/><circle cx="96" cy="108" r="28" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="881" cy="97" r="20" fill="var(--hedge-2)"/><circle cx="876" cy="91" r="20" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="210" cy="590" r="28" fill="var(--hedge-2)"/><circle cx="205" cy="584" r="28" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="146" cy="605" r="16" fill="var(--hedge-2)"/><circle cx="141" cy="599" r="16" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="482" cy="671" r="16" fill="var(--hedge-2)"/><circle cx="477" cy="665" r="16" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="1206" cy="625" r="28" fill="var(--hedge-2)"/><circle cx="1201" cy="619" r="28" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="126" cy="252" r="16" fill="var(--hedge-2)"/><circle cx="121" cy="246" r="16" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="320" cy="579" r="16" fill="var(--hedge-2)"/><circle cx="315" cy="573" r="16" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="1172" cy="724" r="20" fill="var(--hedge-2)"/><circle cx="1167" cy="718" r="20" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="236" cy="621" r="20" fill="var(--hedge-2)"/><circle cx="231" cy="615" r="20" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="787" cy="125" r="16" fill="var(--hedge-2)"/><circle cx="782" cy="119" r="16" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="1292" cy="236" r="28" fill="var(--hedge-2)"/><circle cx="1287" cy="230" r="28" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="1418" cy="570" r="28" fill="var(--hedge-2)"/><circle cx="1413" cy="564" r="28" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="524" cy="109" r="24" fill="var(--hedge-2)"/><circle cx="519" cy="103" r="24" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="1100" cy="532" r="24" fill="var(--hedge-2)"/><circle cx="1095" cy="526" r="24" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="1272" cy="100" r="16" fill="var(--hedge-2)"/><circle cx="1267" cy="94" r="16" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="1073" cy="454" r="20" fill="var(--hedge-2)"/><circle cx="1068" cy="448" r="20" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="105" cy="710" r="16" fill="var(--hedge-2)"/><circle cx="100" cy="704" r="16" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="1167" cy="612" r="24" fill="var(--hedge-2)"/><circle cx="1162" cy="606" r="24" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="721" cy="737" r="24" fill="var(--hedge-2)"/><circle cx="716" cy="731" r="24" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="1242" cy="534" r="28" fill="var(--hedge-2)"/><circle cx="1237" cy="528" r="28" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="165" cy="121" r="24" fill="var(--hedge-2)"/><circle cx="160" cy="115" r="24" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="995" cy="739" r="16" fill="var(--hedge-2)"/><circle cx="990" cy="733" r="16" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="149" cy="744" r="24" fill="var(--hedge-2)"/><circle cx="144" cy="738" r="24" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="1350" cy="617" r="28" fill="var(--hedge-2)"/><circle cx="1345" cy="611" r="28" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="1394" cy="381" r="16" fill="var(--hedge-2)"/><circle cx="1389" cy="375" r="16" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="369" cy="651" r="16" fill="var(--hedge-2)"/><circle cx="364" cy="645" r="16" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="1036" cy="86" r="20" fill="var(--hedge-2)"/><circle cx="1031" cy="80" r="20" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="1150" cy="310" r="20" fill="var(--hedge-2)"/><circle cx="1145" cy="304" r="20" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="906" cy="589" r="24" fill="var(--hedge-2)"/><circle cx="901" cy="583" r="24" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="1423" cy="415" r="20" fill="var(--hedge-2)"/><circle cx="1418" cy="409" r="20" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="334" cy="110" r="20" fill="var(--hedge-2)"/><circle cx="329" cy="104" r="20" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="334" cy="263" r="20" fill="var(--hedge-2)"/><circle cx="329" cy="257" r="20" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="49" cy="522" r="20" fill="var(--hedge-2)"/><circle cx="44" cy="516" r="20" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="33" cy="175" r="28" fill="var(--hedge-2)"/><circle cx="28" cy="169" r="28" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="1273" cy="605" r="24" fill="var(--hedge-2)"/><circle cx="1268" cy="599" r="24" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="282" cy="733" r="16" fill="var(--hedge-2)"/><circle cx="277" cy="727" r="16" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="832" cy="132" r="28" fill="var(--hedge-2)"/><circle cx="827" cy="126" r="28" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="152" cy="221" r="16" fill="var(--hedge-2)"/><circle cx="147" cy="215" r="16" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="721" cy="641" r="16" fill="var(--hedge-2)"/><circle cx="716" cy="635" r="16" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="234" cy="26" r="20" fill="var(--hedge-2)"/><circle cx="229" cy="20" r="20" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="769" cy="654" r="16" fill="var(--hedge-2)"/><circle cx="764" cy="648" r="16" fill="var(--hedge)"/></g>
-      <g class="tree"><circle cx="329" cy="675" r="24" fill="var(--hedge-2)"/><circle cx="324" cy="669" r="24" fill="var(--hedge)"/></g>
-    </g>
+  <!-- The lane from above: the fields, the farm dam and a little car going round the loop -->
+  <svg class="village" viewBox="0 0 2000 1390" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <image href="{{IMG:hero-fields}}" width="2000" height="1390" preserveAspectRatio="xMidYMid slice"/>
+    <path id="lane" d="M-60 1300 C220 1230 420 1300 640 1250 C860 1200 940 1330 1120 1290 C1320 1250 1430 1120 1570 1050 C1730 970 1900 1020 1880 870 C1860 740 1670 770 1670 660 C1670 540 1860 590 1910 470 C1960 360 1880 240 1750 200 C1630 160 1560 70 1600 -80" fill="none" stroke="var(--cream)" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M-60 1300 C220 1230 420 1300 640 1250 C860 1200 940 1330 1120 1290 C1320 1250 1430 1120 1570 1050 C1730 970 1900 1020 1880 870 C1860 740 1670 770 1670 660 C1670 540 1860 590 1910 470 C1960 360 1880 240 1750 200 C1630 160 1560 70 1600 -80" fill="none" stroke="var(--wheat)" stroke-width="4" stroke-dasharray="24 26" stroke-linecap="round"/>
     <!-- a little car driving the loop -->
     <g class="car">
-      <rect x="-15" y="-9" width="30" height="18" rx="6" fill="var(--brick)"/>
-      <rect x="2" y="-7" width="8" height="14" rx="2" fill="var(--sky)"/>
-      <animateMotion dur="36s" repeatCount="indefinite" rotate="auto"><mpath href="#lane"/></animateMotion>
+      <rect x="-21" y="-13" width="42" height="26" rx="8" fill="var(--brick)"/>
+      <rect x="3" y="-10" width="11" height="20" rx="3" fill="var(--sky)"/>
+      <animateMotion dur="40s" repeatCount="indefinite" rotate="auto"><mpath href="#lane"/></animateMotion>
     </g>
   </svg>
+  <div class="sky" id="sky" aria-hidden="true">
+    <div class="cloud" style="--m:url({{PNG:clouds/cloud-1}});--ar:715 / 479;--w:clamp(150px, 20vw, 300px);--top:6%;--dur:95s;--delay:-20s;--morph:11s;--d:10"><div class="cloud-par"><div class="cloud-body"><i class="cloud-shadow"></i><i class="cloud-puff"></i></div></div></div>
+    <div class="cloud" style="--m:url({{PNG:clouds/cloud-2}});--ar:907 / 973;--w:clamp(170px, 21vw, 320px);--top:40%;--dur:130s;--delay:-85s;--morph:14s;--d:22"><div class="cloud-par"><div class="cloud-body"><i class="cloud-shadow"></i><i class="cloud-puff"></i></div></div></div>
+    <div class="cloud" style="--m:url({{PNG:clouds/cloud-3}});--ar:805 / 427;--w:clamp(140px, 18vw, 270px);--top:72%;--dur:80s;--delay:-50s;--morph:9s;--d:16"><div class="cloud-par"><div class="cloud-body"><i class="cloud-shadow"></i><i class="cloud-puff"></i></div></div></div>
+    <div class="cloud" style="--m:url({{PNG:clouds/cloud-1}});--ar:715 / 479;--w:clamp(110px, 13vw, 200px);--top:24%;--dur:150s;--delay:-120s;--morph:13s;--d:6"><div class="cloud-par"><div class="cloud-body"><i class="cloud-shadow"></i><i class="cloud-puff"></i></div></div></div>
+    <div class="cloud" style="--m:url({{PNG:clouds/cloud-3}});--ar:805 / 427;--w:clamp(120px, 15vw, 230px);--top:86%;--dur:110s;--delay:-15s;--morph:10s;--d:12"><div class="cloud-par"><div class="cloud-body"><i class="cloud-shadow"></i><i class="cloud-puff"></i></div></div></div>
+  </div>
 
   <div class="sign">
     <h1 style="margin:0;width:100%;display:flex;justify-content:center">
@@ -558,6 +500,17 @@ footer details ul { text-align: left; columns: 2 280px; margin: 10px 0 0; paddin
   };
   if (!reduce) { const go = () => document.visibilityState === 'visible' ? write() : document.addEventListener('visibilitychange', go, { once: true }); go(); }
   hero.addEventListener('click', write);
+
+  // Clouds lean away from the pointer, nearer ones more
+  const sky = document.getElementById('sky'), heroBox = document.querySelector('.hero');
+  if (!reduce && matchMedia('(pointer: fine)').matches) {
+    heroBox.addEventListener('pointermove', e => {
+      const r = heroBox.getBoundingClientRect();
+      sky.style.setProperty('--px', ((e.clientX - r.left) / r.width - .5) * 2);
+      sky.style.setProperty('--py', ((e.clientY - r.top) / r.height - .5) * 2);
+    });
+    heroBox.addEventListener('pointerleave', () => { sky.style.setProperty('--px', 0); sky.style.setProperty('--py', 0); });
+  }
 
   // To-do list: tap a task to scribble it out; remembered on this device
   const todos = [...document.querySelectorAll('#todoList button')];
