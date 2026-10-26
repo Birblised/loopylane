@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Loopy Lane, Underberg</title>
+<script>/* Go straight to the style this visitor chose last time */try { if (localStorage.getItem("loopylane-style") === "classic") location.replace("../" + location.hash); } catch (e) {}</script>
+<meta name="description" content="Farms, cottages, gardens and big mountain views along Loopy Lane, Underberg, in the southern Drakensberg.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Patrick+Hand&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>{{LEAFLET_CSS}}</style>
+<style>
+/* Loopy Lane v2: a storybook village seen from above. Flat pastel shapes, no outlines, solid "pressable" shadows,
+   and a handwritten to-do list. One deliberate light look. */
+:root {
+  --lawn: #A9C47F;  --lawn-2: #93B567; --field: #C2D695; --wheat: #E3D58F;
+  --hedge: #5E8A4A; --hedge-2: #4C7340;
+  --pond: #8EC3D0;  --pond-2: #6FA8BF;
+  --brick: #D98E6A; --brick-2: #B9704F;
+  --mustard: #D9A441; --mustard-2: #B8862C;
+  --paper: #FBF6E6; --cream: #F3EAD0; --line: #E2D6B4;
+  --ink: #2F3B33;   --ink-2: #56645B; --pencil: #3E4642;
+  --sky: #DCEBE6;
+  --font-display: "Fredoka", "Nunito", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-hand: "Patrick Hand", "Comic Sans MS", cursive;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+  color-scheme: light;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--sky); color: var(--ink); font: 400 1.05rem/1.65 var(--font-body); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; line-height: 1.12; margin: 0; text-wrap: balance; }
+h2 { font-size: clamp(2rem, 5vw, 3rem); }
+p { margin: 0; }
+a { color: inherit; }
+img { max-width: 100%; display: block; }
+:focus-visible { outline: 3px solid var(--mustard); outline-offset: 3px; border-radius: 6px; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); }
+section { padding-block: clamp(64px, 9vw, 104px); }
+.section-head { display: grid; gap: 12px; justify-items: center; text-align: center; margin-bottom: 36px; }
+.lede { color: var(--ink-2); max-width: 58ch; font-size: 1.08rem; }
+
+/* Chunky game buttons: flat fill, a solid shadow underneath, and a real press */
+.btn { --b: var(--hedge); --b2: var(--hedge-2); --t: var(--paper);
+  display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border: 0; border-radius: 14px;
+  background: var(--b); color: var(--t); font: 700 1rem/1.2 var(--font-display); letter-spacing: .01em; text-decoration: none; cursor: pointer;
+  box-shadow: 0 5px 0 var(--b2); transform: translateY(0); transition: transform .08s, box-shadow .08s, filter .15s; }
+.btn:hover { filter: brightness(1.05); }
+.btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--b2); }
+.btn-paper { --b: var(--paper); --b2: var(--line); --t: var(--ink); }
+.btn-mustard { --b: var(--mustard); --b2: var(--mustard-2); --t: var(--ink); }
+.btn small { font: 800 .68rem var(--font-body); letter-spacing: .08em; padding: 2px 6px; border-radius: 6px; background: rgba(0,0,0,.12); }
+
+/* Style strip */
+.mode-bar { background: var(--hedge-2); color: var(--paper); font: 600 .82rem var(--font-display); }
+.mode-bar .wrap { display: flex; align-items: center; justify-content: flex-end; gap: 10px; height: 40px; }
+.mode-toggle { display: flex; gap: 6px; }
+.mode-toggle a { padding: 3px 12px; border-radius: 999px; text-decoration: none; color: var(--paper); background: var(--hedge); box-shadow: 0 3px 0 #3E5F34; transition: transform .08s, box-shadow .08s; }
+.mode-toggle a:active { transform: translateY(2px); box-shadow: 0 1px 0 #3E5F34; }
+.mode-toggle a[aria-current] { background: var(--paper); color: var(--ink); box-shadow: 0 3px 0 var(--line); pointer-events: none; }
+
+/* Nav */
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 1100; background: var(--paper); box-shadow: 0 4px 0 var(--line); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 1101; background: var(--paper); }
+.nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 14px; height: 64px; }
+.nav-logo { display: block; width: 112px; aspect-ratio: 606 / 181; background: var(--ink);
+  -webkit-mask: url("{{LOGO}}") center / contain no-repeat; mask: url("{{LOGO}}") center / contain no-repeat; }
+.nav ul { display: flex; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.nav ul a { display: block; padding: 7px 12px; border-radius: 10px; font: 600 .98rem var(--font-display); text-decoration: none; color: var(--ink-2); transition: background .15s, color .15s; }
+.nav ul a:hover { background: var(--cream); color: var(--ink); }
+@media (max-width: 720px) { .nav ul li:nth-child(n+4) { display: none; } .nav ul a { padding: 6px 8px; font-size: .92rem; } }
+
+/* Hero: the village from above, with the sign board in the middle */
+.hero { position: relative; background: var(--lawn); overflow: hidden; min-height: clamp(560px, 78vh, 760px); display: grid; place-items: center; padding-block: 48px; }
+.village { position: absolute; inset: 0; width: 100%; height: 100%; }
+.village .car { offset-rotate: auto; }
+.tree { transform-box: fill-box; transform-origin: center; animation: sway 6s ease-in-out infinite alternate; }
+.tree:nth-of-type(3n) { animation-duration: 7.5s; } .tree:nth-of-type(4n) { animation-delay: -2s; }
+@keyframes sway { to { transform: scale(1.04) rotate(2deg); } }
+.sign { position: relative; z-index: 2; width: min(640px, calc(100% - 32px)); background: var(--paper); border-radius: 26px; padding: clamp(24px, 4vw, 40px) clamp(20px, 4vw, 44px) 32px;
+  box-shadow: 0 10px 0 var(--hedge-2); display: grid; justify-items: center; gap: 14px; text-align: center; }
+.sign::before, .sign::after { content: ""; position: absolute; top: 100%; width: 16px; height: 46px; background: var(--brick-2); border-radius: 0 0 6px 6px; z-index: -1; }
+.sign::before { left: 22%; } .sign::after { right: 22%; }
+.pen-logo { width: min(520px, 100%); height: auto; display: block; cursor: pointer; }
+.sign .tag { font: 400 1.35rem/1.35 var(--font-hand); color: var(--ink-2); max-width: 30ch; }
+.sign .cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-top: 8px; }
+.pop { animation: pop .55s cubic-bezier(.3,1.5,.5,1) both; }
+@keyframes pop { from { transform: scale(.85); opacity: 0; } }
+.d1 { animation-delay: 3.2s; } .d2 { animation-delay: 3.45s; }
+
+/* To-do list on a notepad */
+.todo-band { background: var(--lawn-2); }
+.notepad { position: relative; max-width: 560px; margin: 0 auto; background: var(--paper); border-radius: 8px 8px 16px 16px; padding: 64px 34px 38px 66px;
+  box-shadow: 0 10px 0 var(--hedge-2); transform: rotate(-1.2deg);
+  background-image: linear-gradient(transparent 0 46px, var(--line) 46px 48px); background-size: 100% 48px; background-position: 0 58px; }
+.notepad::before { content: ""; position: absolute; left: 48px; top: 0; bottom: 0; width: 2px; background: var(--brick); opacity: .55; }
+.notepad::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 26px; border-radius: 8px 8px 0 0; background:
+  radial-gradient(circle at 12px 13px, var(--lawn-2) 5px, transparent 6px) 0 0 / 34px 26px repeat-x, var(--brick); }
+.notepad h2 { font: 400 2.4rem/1 var(--font-hand); margin: 0 0 14px; }
+.todo { list-style: none; margin: 0; padding: 0; }
+.todo li { position: relative; }
+.todo button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 0; font: 400 1.45rem/48px var(--font-hand); color: var(--pencil); cursor: pointer; position: relative; }
+.todo button span { position: relative; }
+@media (max-width: 520px) { .notepad { padding: 60px 16px 30px 50px; } .notepad::before { left: 36px; } .todo button { font-size: 1.25rem; } .notepad h2 { font-size: 2rem; } }
+.todo svg.strike { position: absolute; left: -6px; right: -6px; top: 50%; width: calc(100% + 12px); height: 24px; transform: translateY(-50%); overflow: visible; pointer-events: none; }
+.todo svg.strike path { fill: none; stroke: var(--pencil); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 400; stroke-dashoffset: 400; transition: stroke-dashoffset .45s ease-out; }
+.todo button[aria-pressed="true"] svg.strike path { stroke-dashoffset: 0; }
+.todo button[aria-pressed="true"] { color: var(--ink-2); }
+.todo a { text-decoration-color: var(--mustard); text-decoration-thickness: 3px; text-underline-offset: 4px; }
+.todo-done { margin-top: 14px; font: 400 1.25rem var(--font-hand); color: var(--hedge); min-height: 1.6em; }
+
+/* Map */
+.map-band { background: var(--cream); }
+.chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 26px; }
+.chip { --b: var(--paper); --b2: var(--line); --c: var(--hedge); display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; padding: 9px 16px;
+  background: var(--b); color: var(--ink); font: 600 .95rem var(--font-display); cursor: pointer; box-shadow: 0 4px 0 var(--b2); transition: transform .08s, box-shadow .08s; }
+.chip .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--c); }
+.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--b2); }
+.chip[aria-pressed="true"] { --b: var(--c); --b2: var(--hedge-2); color: var(--paper); }
+.chip[aria-pressed="true"] .dot { background: var(--paper); }
+.map-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 26px; align-items: start; }
+@media (max-width: 900px) { .map-grid { grid-template-columns: 1fr; } }
+.map-frame { position: relative; aspect-ratio: 8 / 5.4; border-radius: 22px; overflow: hidden; background: var(--lawn); box-shadow: 0 8px 0 var(--line); border: 8px solid var(--paper); }
+@media (max-width: 600px) { .map-frame { aspect-ratio: 1 / 1; } }
+#realMap { position: absolute; inset: 0; font-family: var(--font-body); background: var(--lawn); }
+#realMap .leaflet-tile-pane { filter: saturate(.62) sepia(.18) brightness(1.04) hue-rotate(-6deg); }
+.map-fallback { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; font: 400 1.3rem var(--font-hand); color: var(--ink-2); }
+.map-frame.live .map-fallback { display: none; }
+.lpin span { display: block; width: 20px; height: 20px; border-radius: 50%; background: var(--c); border: 3px solid var(--paper); box-shadow: 0 3px 0 rgba(47,59,51,.35); transition: transform .15s; }
+.lpin:hover span, .lpin.active span { transform: scale(1.3) translateY(-2px); }
+.ltown span { display: block; width: 18px; height: 18px; border-radius: 5px; background: var(--ink); border: 3px solid var(--paper); }
+.leaflet-tooltip.ltip { background: var(--ink); color: var(--paper); border: 0; border-radius: 10px; padding: 5px 10px; font: 600 13px var(--font-display); box-shadow: none; }
+.leaflet-tooltip.ltip::before { display: none; }
+.leaflet-control-layers-toggle { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232F3B33' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M12 3 2 8l10 5 10-5z'/%3E%3Cpath d='m2 13 10 5 10-5'/%3E%3C/svg%3E") !important; background-size: 22px 22px !important; }
+.side { display: grid; gap: 16px; min-width: 0; }
+.detail { background: var(--paper); border-radius: 18px; padding: 18px 20px; box-shadow: 0 6px 0 var(--line); display: grid; gap: 6px; border-left: 10px solid var(--c); }
+.detail .meta { font: 700 .75rem var(--font-body); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
+.detail h3 { font-size: 1.45rem; }
+.detail p { color: var(--ink-2); }
+.place-list { list-style: none; margin: 0; padding: 6px; max-height: 330px; overflow-y: auto; background: var(--paper); border-radius: 18px; box-shadow: 0 6px 0 var(--line); }
+.place-list li[hidden] { display: none; }
+.place-list button { width: 100%; display: grid; grid-template-columns: 14px minmax(0,1fr) auto; gap: 12px; align-items: center; padding: 10px 12px; border: 0; border-radius: 12px; background: none; color: var(--ink); font: 600 .97rem var(--font-body); text-align: left; cursor: pointer; }
+.place-list button:hover, .place-list button.active { background: var(--cream); }
+.place-list .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--c); }
+.place-list .d { font: 700 .8rem var(--font-body); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.map-links { display: flex; flex-wrap: wrap; gap: 14px; }
+
+/* Explore: photo cards pinned slightly askew */
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px 26px; }
+@media (max-width: 960px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
+.card { background: var(--paper); border-radius: 20px; padding: 12px 12px 20px; box-shadow: 0 8px 0 var(--line); transform: rotate(var(--r, 0deg)); transition: transform .25s cubic-bezier(.3,1.5,.5,1); }
+.card:nth-child(3n+1) { --r: -1deg; } .card:nth-child(3n+2) { --r: .8deg; } .card:nth-child(3n) { --r: -.5deg; }
+.card:hover { transform: rotate(0deg) translateY(-6px); }
+.card .photo { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; background: var(--lawn); }
+.card .body { padding: 14px 8px 0; display: grid; gap: 8px; }
+.card .kind { justify-self: start; font: 700 .72rem var(--font-body); letter-spacing: .08em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; background: var(--cream); color: var(--ink-2); }
+.card h3 { font-size: 1.35rem; }
+.card p { color: var(--ink-2); font-size: .98rem; }
+
+/* Flora and fauna: specimen cards */
+.nature-band { background: var(--lawn); }
+.nature-band .lede { color: var(--ink); }
+.guide { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+@media (max-width: 800px) { .guide { grid-template-columns: 1fr; } }
+.guide-col { background: var(--paper); border-radius: 22px; padding: 22px clamp(16px, 3vw, 26px) 10px; box-shadow: 0 8px 0 var(--hedge-2); }
+.guide-col h3 { font: 400 2.1rem/1 var(--font-hand); margin-bottom: 6px; }
+.species { list-style: none; margin: 0; padding: 0; }
+.spec { display: grid; grid-template-columns: 62px minmax(0, 1fr); gap: 14px; padding: 14px 0; border-bottom: 2px dashed var(--line); }
+.spec:last-child { border-bottom: 0; }
+.spec-photo { width: 62px; height: 62px; border-radius: 50%; object-fit: cover; border: 3px solid var(--cream); box-shadow: 0 3px 0 var(--line); }
+.spec h4 { font-size: 1.12rem; }
+.spec h4 i { font: italic 400 .88rem var(--font-body); color: var(--ink-2); margin-left: 4px; }
+.spec p { color: var(--ink-2); font-size: .95rem; margin-top: 2px; }
+.spec .where { display: inline-block; margin-top: 6px; font: 700 .7rem var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--brick-2); }
+.guide-foot { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 16px 22px; margin-top: 36px; text-align: center; }
+.guide-foot p { font: 400 1.3rem/1.3 var(--font-hand); max-width: 34ch; }
+
+/* History: a winding garden path */
+.history-band { background: var(--cream); }
+.path { list-style: none; margin: 0 auto; padding: 0; max-width: 760px; display: grid; gap: 22px; position: relative; }
+.path::before { content: ""; position: absolute; left: 27px; top: 10px; bottom: 10px; width: 6px; border-radius: 3px; background: repeating-linear-gradient(var(--wheat) 0 14px, transparent 14px 24px); }
+.path li { display: grid; grid-template-columns: 60px minmax(0, 1fr); gap: 18px; align-items: start; }
+.stone { width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; background: var(--paper); box-shadow: 0 5px 0 var(--line); font: 700 .78rem/1.05 var(--font-display); text-align: center; color: var(--hedge-2); position: relative; z-index: 1; padding: 4px; }
+.path .txt { background: var(--paper); border-radius: 18px; padding: 16px 20px; box-shadow: 0 5px 0 var(--line); display: grid; gap: 4px; }
+.path h3 { font-size: 1.2rem; }
+.path p { color: var(--ink-2); font-size: .98rem; }
+
+/* Seasons */
+.seasons-band { background: var(--pond-2); color: var(--paper); }
+.seasons-band .lede { color: #EAF3F2; }
+.season-tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 30px; }
+.season-tabs .btn { --b: #5C93A9; --b2: #4A7C90; }
+.season-tabs .btn[aria-selected="true"] { --b: var(--paper); --b2: #4A7C90; --t: var(--ink); }
+.season-panel { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 34px; align-items: center; }
+@media (max-width: 800px) { .season-panel { grid-template-columns: 1fr; } }
+.season-panel[hidden] { display: none !important; }
+.season-photo { width: 100%; aspect-ratio: 16 / 11; object-fit: cover; border-radius: 24px; border: 8px solid var(--paper); box-shadow: 0 8px 0 #4A7C90; }
+.season-copy { display: grid; gap: 12px; }
+.season-copy .months { font: 400 1.3rem var(--font-hand); color: #FFF3C9; }
+.season-copy h3 { font-size: 2rem; }
+.season-copy ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.season-copy li { padding-left: 28px; position: relative; }
+.season-copy li::before { content: ""; position: absolute; left: 0; top: .45em; width: 14px; height: 14px; border-radius: 50%; background: var(--wheat); }
+.season-panel.show .season-photo, .season-panel.show .season-copy { animation: pop .45s cubic-bezier(.3,1.4,.5,1) both; }
+
+/* Footer: a hedge along the bottom of the garden */
+footer { background: var(--hedge); color: var(--cream); padding-block: 0 40px; }
+.hedge { display: block; width: 100%; height: 60px; background: var(--pond-2); }
+footer .wrap { display: grid; gap: 18px; justify-items: center; text-align: center; padding-top: 26px; }
+.foot-logo { width: 200px; aspect-ratio: 606 / 181; background: var(--paper); -webkit-mask: url("{{LOGO}}") center / contain no-repeat; mask: url("{{LOGO}}") center / contain no-repeat; }
+footer small { font: 600 .82rem var(--font-body); color: #DCE7CF; }
+footer details { font: 600 .78rem/1.5 var(--font-body); color: #DCE7CF; max-width: 780px; }
+footer summary { cursor: pointer; }
+footer details ul { text-align: left; columns: 2 280px; margin: 10px 0 0; padding-left: 18px; }
+
+.reveal.in { animation: pop .5s cubic-bezier(.3,1.4,.5,1) both; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  html { scroll-behavior: auto; }
+}
+</style>
+<link rel="icon" type="image/png" sizes="64x64" href="data:image/png;base64,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">
+</head>
+<body>
+
+<div class="mode-bar"><div class="wrap"><span class="mode-label">Style</span><div class="mode-toggle" role="group" aria-label="Site style"><a href="../" data-style="classic">Classic</a><a href="#" aria-current="page">Storybook</a></div></div></div>
+
+<nav class="nav" aria-label="Main">
+  <div class="wrap">
+    <a href="#top" aria-label="Loopy Lane home"><span class="nav-logo" role="img" aria-label="Loopy Lane"></span></a>
+    <ul>
+      <li><a href="#map">Map</a></li>
+      <li><a href="#todo">To do</a></li>
+      <li><a href="#explore">Explore</a></li>
+      <li><a href="#nature">Nature</a></li>
+      <li><a href="#history">History</a></li>
+      <li><a href="#seasons">Seasons</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <!-- The lane from above: patchwork fields, hedgerows, a farm dam and a little car going round the loop -->
+  <svg class="village" viewBox="0 0 1440 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <rect width="1440" height="760" fill="var(--lawn)"/>
+    <g stroke="var(--hedge)" stroke-width="12" stroke-linejoin="round">
+      <path d="M0 0 H420 L380 250 L0 300Z" fill="var(--field)"/>
+      <path d="M420 0 H860 L820 190 L380 250Z" fill="var(--wheat)"/>
+      <path d="M860 0 H1440 V230 L1060 260 L820 190Z" fill="var(--lawn-2)"/>
+      <path d="M0 300 L380 250 L330 560 L0 600Z" fill="var(--lawn-2)"/>
+      <path d="M1060 260 L1440 230 V560 L1100 600Z" fill="var(--wheat)"/>
+      <path d="M0 600 L330 560 L420 760 H0Z" fill="var(--wheat)"/>
+      <path d="M330 560 L760 610 L800 760 H420Z" fill="var(--field)"/>
+      <path d="M760 610 L1100 600 L1440 560 V760 H800Z" fill="var(--field)"/>
+    </g>
+    <ellipse cx="1210" cy="420" rx="110" ry="70" fill="var(--pond-2)"/>
+    <ellipse cx="1200" cy="410" rx="92" ry="54" fill="var(--pond)"/>
+    <!-- the lane -->
+    <path id="lane" d="M-40 700 C200 640 260 560 300 470 C350 350 200 300 240 200 C290 80 520 70 560 170 C600 270 470 330 560 400 C660 480 800 380 900 330 C1030 260 1080 120 1200 140 C1330 160 1340 300 1260 330 C1170 360 1020 420 1000 520 C980 640 1200 700 1480 660"
+          fill="none" stroke="var(--cream)" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M-40 700 C200 640 260 560 300 470 C350 350 200 300 240 200 C290 80 520 70 560 170 C600 270 470 330 560 400 C660 480 800 380 900 330 C1030 260 1080 120 1200 140 C1330 160 1340 300 1260 330 C1170 360 1020 420 1000 520 C980 640 1200 700 1480 660"
+          fill="none" stroke="var(--wheat)" stroke-width="3" stroke-dasharray="18 20" stroke-linecap="round"/>
+    <!-- cottages, seen from above -->
+    <g>
+      <rect x="120" y="120" width="70" height="48" rx="4" fill="var(--brick)"/><rect x="120" y="140" width="70" height="8" fill="var(--brick-2)"/>
+      <rect x="640" y="70" width="84" height="54" rx="4" fill="var(--brick)"/><rect x="640" y="93" width="84" height="8" fill="var(--brick-2)"/>
+      <rect x="1080" y="500" width="64" height="46" rx="4" fill="var(--paper)"/><rect x="1080" y="519" width="64" height="8" fill="var(--line)"/>
+      <rect x="420" y="560" width="74" height="50" rx="4" fill="var(--brick)"/><rect x="420" y="581" width="74" height="8" fill="var(--brick-2)"/>
+      <rect x="1310" y="40" width="70" height="48" rx="4" fill="var(--paper)"/><rect x="1310" y="60" width="70" height="8" fill="var(--line)"/>
+    </g>
+    <!-- trees: a flat crown with a darker shadow crown under it -->
+    <g id="trees">
+      <g class="tree"><circle cx="688" cy="180" r="28" fill="var(--hedge-2)"/><circle cx="683" cy="174" r="28" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="1358" cy="75" r="16" fill="var(--hedge-2)"/><circle cx="1353" cy="69" r="16" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="1122" cy="122" r="24" fill="var(--hedge-2)"/><circle cx="1117" cy="116" r="24" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="101" cy="114" r="28" fill="var(--hedge-2)"/><circle cx="96" cy="108" r="28" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="881" cy="97" r="20" fill="var(--hedge-2)"/><circle cx="876" cy="91" r="20" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="210" cy="590" r="28" fill="var(--hedge-2)"/><circle cx="205" cy="584" r="28" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="146" cy="605" r="16" fill="var(--hedge-2)"/><circle cx="141" cy="599" r="16" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="482" cy="671" r="16" fill="var(--hedge-2)"/><circle cx="477" cy="665" r="16" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="1206" cy="625" r="28" fill="var(--hedge-2)"/><circle cx="1201" cy="619" r="28" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="126" cy="252" r="16" fill="var(--hedge-2)"/><circle cx="121" cy="246" r="16" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="320" cy="579" r="16" fill="var(--hedge-2)"/><circle cx="315" cy="573" r="16" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="1172" cy="724" r="20" fill="var(--hedge-2)"/><circle cx="1167" cy="718" r="20" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="236" cy="621" r="20" fill="var(--hedge-2)"/><circle cx="231" cy="615" r="20" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="787" cy="125" r="16" fill="var(--hedge-2)"/><circle cx="782" cy="119" r="16" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="1292" cy="236" r="28" fill="var(--hedge-2)"/><circle cx="1287" cy="230" r="28" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="1418" cy="570" r="28" fill="var(--hedge-2)"/><circle cx="1413" cy="564" r="28" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="524" cy="109" r="24" fill="var(--hedge-2)"/><circle cx="519" cy="103" r="24" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="1100" cy="532" r="24" fill="var(--hedge-2)"/><circle cx="1095" cy="526" r="24" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="1272" cy="100" r="16" fill="var(--hedge-2)"/><circle cx="1267" cy="94" r="16" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="1073" cy="454" r="20" fill="var(--hedge-2)"/><circle cx="1068" cy="448" r="20" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="105" cy="710" r="16" fill="var(--hedge-2)"/><circle cx="100" cy="704" r="16" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="1167" cy="612" r="24" fill="var(--hedge-2)"/><circle cx="1162" cy="606" r="24" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="721" cy="737" r="24" fill="var(--hedge-2)"/><circle cx="716" cy="731" r="24" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="1242" cy="534" r="28" fill="var(--hedge-2)"/><circle cx="1237" cy="528" r="28" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="165" cy="121" r="24" fill="var(--hedge-2)"/><circle cx="160" cy="115" r="24" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="995" cy="739" r="16" fill="var(--hedge-2)"/><circle cx="990" cy="733" r="16" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="149" cy="744" r="24" fill="var(--hedge-2)"/><circle cx="144" cy="738" r="24" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="1350" cy="617" r="28" fill="var(--hedge-2)"/><circle cx="1345" cy="611" r="28" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="1394" cy="381" r="16" fill="var(--hedge-2)"/><circle cx="1389" cy="375" r="16" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="369" cy="651" r="16" fill="var(--hedge-2)"/><circle cx="364" cy="645" r="16" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="1036" cy="86" r="20" fill="var(--hedge-2)"/><circle cx="1031" cy="80" r="20" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="1150" cy="310" r="20" fill="var(--hedge-2)"/><circle cx="1145" cy="304" r="20" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="906" cy="589" r="24" fill="var(--hedge-2)"/><circle cx="901" cy="583" r="24" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="1423" cy="415" r="20" fill="var(--hedge-2)"/><circle cx="1418" cy="409" r="20" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="334" cy="110" r="20" fill="var(--hedge-2)"/><circle cx="329" cy="104" r="20" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="334" cy="263" r="20" fill="var(--hedge-2)"/><circle cx="329" cy="257" r="20" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="49" cy="522" r="20" fill="var(--hedge-2)"/><circle cx="44" cy="516" r="20" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="33" cy="175" r="28" fill="var(--hedge-2)"/><circle cx="28" cy="169" r="28" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="1273" cy="605" r="24" fill="var(--hedge-2)"/><circle cx="1268" cy="599" r="24" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="282" cy="733" r="16" fill="var(--hedge-2)"/><circle cx="277" cy="727" r="16" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="832" cy="132" r="28" fill="var(--hedge-2)"/><circle cx="827" cy="126" r="28" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="152" cy="221" r="16" fill="var(--hedge-2)"/><circle cx="147" cy="215" r="16" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="721" cy="641" r="16" fill="var(--hedge-2)"/><circle cx="716" cy="635" r="16" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="234" cy="26" r="20" fill="var(--hedge-2)"/><circle cx="229" cy="20" r="20" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="769" cy="654" r="16" fill="var(--hedge-2)"/><circle cx="764" cy="648" r="16" fill="var(--hedge)"/></g>
+      <g class="tree"><circle cx="329" cy="675" r="24" fill="var(--hedge-2)"/><circle cx="324" cy="669" r="24" fill="var(--hedge)"/></g>
+    </g>
+    <!-- a little car driving the loop -->
+    <g class="car">
+      <rect x="-15" y="-9" width="30" height="18" rx="6" fill="var(--brick)"/>
+      <rect x="2" y="-7" width="8" height="14" rx="2" fill="var(--sky)"/>
+      <animateMotion dur="36s" repeatCount="indefinite" rotate="auto"><mpath href="#lane"/></animateMotion>
+    </g>
+  </svg>
+
+  <div class="sign">
+    <h1 style="margin:0;width:100%;display:flex;justify-content:center">
+      <svg class="pen-logo" id="heroLogo" viewBox="0 0 606 181" role="img" aria-label="Loopy Lane">
+        <defs>
+          <mask id="inkMask" maskUnits="userSpaceOnUse" x="0" y="0" width="606" height="181"><image href="{{LOGO}}" width="606" height="181"/></mask>
+          <mask id="penMask" maskUnits="userSpaceOnUse" x="0" y="0" width="606" height="181">
+            <g id="pen" fill="none" stroke="#fff" stroke-width="30" stroke-linecap="round" stroke-linejoin="round">
+{{PEN}}
+            </g>
+            <rect id="penDone" width="606" height="181" fill="#fff"/>
+          </mask>
+        </defs>
+        <g mask="url(#inkMask)"><rect width="606" height="181" fill="var(--ink)" mask="url(#penMask)"/></g>
+      </svg>
+    </h1>
+    <p class="tag pop d1">Farms, cottages, gardens and big mountain views, just outside Underberg.</p>
+    <div class="cta pop d2">
+      <a class="btn" href="#map">Walk the map</a>
+      <a class="btn btn-mustard" href="#todo">See the to-do list</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- TO DO -->
+  <section class="todo-band" id="todo">
+    <div class="wrap">
+      <div class="notepad reveal">
+        <h2>Loopy Lane to-do list</h2>
+        <ul class="todo" id="todoList">
+          <li><button type="button" data-k="loop" aria-pressed="false"><span>Drive the whole loop<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
+          <li><button type="button" data-k="crane" aria-pressed="false"><span>Spot a wattled crane<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
+          <li><button type="button" data-k="garden" aria-pressed="false"><span>See an open garden in November<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
+          <li><button type="button" data-k="pig" aria-pressed="false"><span>Lunch at the Pig and Pony<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
+          <li><button type="button" data-k="glider" aria-pressed="false"><span>Watch the gliders take off<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
+          <li><button type="button" data-k="trout" aria-pressed="false"><span>Catch a trout<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
+          <li><button type="button" data-k="sani" aria-pressed="false"><span>Drive up Sani Pass<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
+          <li><button type="button" data-k="hairpins" aria-pressed="false"><span>Fit every hairpin in one photo<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
+          <li><button type="button" data-k="firelily" aria-pressed="false"><span>Find a fire lily after a burn<svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
+          <li><button type="button" data-k="checklist" aria-pressed="false"><span>Get the <a href="../loopy-lane-spotters-checklist.pdf" download>spotter's checklist</a><svg class="strike" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 C60 8 110 18 160 11 S250 16 296 9"/></svg></span></button></li>
+        </ul>
+        <p class="todo-done" id="todoDone" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAP -->
+  <section class="map-band" id="map">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>Where to stay and what to do</h2>
+        <p class="lede">Thirty farms, cottages, campsites and country stops between Underberg and the Bushman's Nek valley. Tap a pin or a name to see how far it is from town.</p>
+      </div>
+      <div class="chips" role="group" aria-label="Filter places">
+        <button class="chip" data-f="all" aria-pressed="true" style="--c:var(--ink)"><span class="dot"></span>Everything</button>
+        <button class="chip" data-f="stay" aria-pressed="false" style="--c:var(--hedge)"><span class="dot"></span>Stay</button>
+        <button class="chip" data-f="camp" aria-pressed="false" style="--c:var(--mustard)"><span class="dot"></span>Camping</button>
+        <button class="chip" data-f="eat" aria-pressed="false" style="--c:var(--brick)"><span class="dot"></span>Eat &amp; drink</button>
+        <button class="chip" data-f="do" aria-pressed="false" style="--c:var(--pond-2)"><span class="dot"></span>Activities</button>
+      </div>
+      <div class="map-grid">
+        <div class="map-frame reveal" id="mapFrame">
+          <div id="realMap" aria-label="Map of the places around Loopy Lane"></div>
+          <p class="map-fallback">The map is having a little nap. Every place is listed alongside.</p>
+        </div>
+        <div class="side">
+          <div class="detail" id="placeDetail" aria-live="polite"></div>
+          <ul class="place-list" id="placeList" aria-label="All places"></ul>
+          <div class="map-links">
+            <a class="btn" id="detailMapLink" href="https://www.google.com/maps/search/?api=1&amp;query=Underberg" target="_blank" rel="noopener">Open in Google Maps</a>
+            <a class="btn btn-paper" href="https://www.google.com/maps/dir/?api=1&amp;destination=Underberg,+KwaZulu-Natal" target="_blank" rel="noopener">Directions</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPLORE -->
+  <section id="explore">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>Further afield</h2>
+        <p class="lede">The mountain, the wetlands and the big day trips of the southern Berg.</p>
+      </div>
+      <div class="cards">
+        <article class="card"><img class="photo" src="{{IMG:garden}}" alt="Roses and a flowering trough beside an old stone wall in a sunlit country garden" style="object-position:50% 35%" loading="lazy"><div class="body"><span class="kind">Around town · Seasonal</span><h3>The open gardens</h3><p>Private gardens along the lane open to visitors for the Underberg Open Gardens weekend each November, with proceeds going to local charities. Outside open days, enjoy them from the road.</p></div></article>
+        <article class="card"><img class="photo" src="{{IMG:hlogoma}}" alt="Farmland, plantations and a farm dam below the Drakensberg on a clear summer day" style="object-position:50% 70%" loading="lazy"><div class="body"><span class="kind">Around town · Any time</span><h3>Hlogoma views</h3><p>Underberg means "under the mountain", and the mountain is Hlogoma, the "place of echoes". The lane gives open views of it across the farmland, best in low morning or evening light.</p></div></article>
+        <article class="card"><img class="photo" src="{{IMG:cranes}}" alt="A wattled crane spreading its wings in grassland" loading="lazy"><div class="body"><span class="kind">Around town · Bring binoculars</span><h3>Wetlands and cranes</h3><p>The highland wetlands around Underberg are home to grey crowned, blue and wattled cranes. Keep a respectful distance and stay in your car near nesting areas.</p></div></article>
+        <article class="card"><img class="photo" src="{{IMG:himeville}}" alt="The sandstone fort and gaol in Himeville, now the Himeville Museum, with its red roof and stone wall" style="object-position:50% 38%" loading="lazy"><div class="body"><span class="kind">Nearby · ~5 km</span><h3>Himeville Museum</h3><p>Underberg's neighbouring village keeps its local history in the old fort and gaol, built at the turn of the 1900s. Displays cover San heritage, early settlers and farm life.</p></div></article>
+        <article class="card"><img class="photo" src="{{IMG:sani}}" alt="The Sani Pass road winding up a green valley towards the escarpment" loading="lazy"><div class="body"><span class="kind">Day trip · Passport needed</span><h3>Sani Pass</h3><p>The famous switchback road climbs the escarpment to the Lesotho border at 2,876 m. Go with a 4x4 tour operator and take your passport; the summit lodge serves a hot lunch with a view.</p></div></article>
+        <article class="card"><img class="photo" src="{{IMG:castle}}" alt="The rocky turrets of Garden Castle rising above green grassland and sandstone bands" style="object-position:50% 30%" loading="lazy"><div class="body"><span class="kind">Day trip · Hiking</span><h3>Garden Castle and Rhino Peak</h3><p>A southern gateway into the Drakensberg park, with trout streams, short valley walks and the long, steep day hike up to Rhino Peak. Book permits at the reserve gate.</p></div></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- NATURE -->
+  <section class="nature-band" id="nature">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>Flora and fauna</h2>
+        <p class="lede">What to look out for in the grassland, wetlands and cliffs around the lane. Bring binoculars and keep your distance from nesting birds.</p>
+      </div>
+      <div class="guide">
+        <div class="guide-col reveal"><h3>Fauna</h3><ul class="species">
+          <li class="spec"><img class="spec-photo" src="{{IMG:species/bearded-vulture}}" alt="Bearded vulture" loading="lazy"><div><h4>Bearded vulture <i>Gypaetus barbatus</i></h4><p>One of Africa’s rarest raptors. Southern Africa’s only population lives in these mountains, gliding along the escarpment.</p><span class="where">Cliffs · all year</span></div></li>
+          <li class="spec"><img class="spec-photo" src="{{IMG:species/cape-vulture}}" alt="Cape vulture" loading="lazy"><div><h4>Cape vulture <i>Gyps coprotheres</i></h4><p>Breeds in colonies on the high sandstone cliffs and rides the thermals over the foothills.</p><span class="where">Cliffs · all year</span></div></li>
+          <li class="spec"><img class="spec-photo" src="{{IMG:species/wattled-crane}}" alt="Wattled crane" loading="lazy"><div><h4>Wattled crane <i>Bugeranus carunculatus</i></h4><p>South Africa’s rarest crane. The highland wetlands of this district are among its last strongholds.</p><span class="where">Wetlands · all year</span></div></li>
+          <li class="spec"><img class="spec-photo" src="{{IMG:species/bald-ibis}}" alt="Southern bald ibis" loading="lazy"><div><h4>Southern bald ibis <i>Geronticus calvus</i></h4><p>A glossy ibis with a red crown, feeding in short, freshly burnt grassland.</p><span class="where">Grassland · winter and spring</span></div></li>
+          <li class="spec"><img class="spec-photo" src="{{IMG:species/eland}}" alt="Eland" loading="lazy"><div><h4>Eland <i>Taurotragus oryx</i></h4><p>Africa’s largest antelope, and the animal the San painted most often on the rock shelters of the Berg.</p><span class="where">Foothills · all year</span></div></li>
+          <li class="spec"><img class="spec-photo" src="{{IMG:species/grey-rhebok}}" alt="Grey rhebok" loading="lazy"><div><h4>Grey rhebok <i>Pelea capreolus</i></h4><p>A woolly-coated antelope of the high grassland, usually seen in small groups on open slopes.</p><span class="where">High grassland · all year</span></div></li>
+        </ul></div>
+        <div class="guide-col reveal"><h3>Flora</h3><ul class="species">
+          <li class="spec"><img class="spec-photo" src="{{IMG:species/sugarbush}}" alt="Common sugarbush" loading="lazy"><div><h4>Common sugarbush <i>Protea caffra</i></h4><p>Gnarled protea trees scattered across the rocky hillsides, with pale pink flower heads that draw sugarbirds.</p><span class="where">Rocky slopes · summer</span></div></li>
+          <li class="spec"><img class="spec-photo" src="{{IMG:species/red-hot-poker}}" alt="Red-hot poker" loading="lazy"><div><h4>Red-hot poker <i>Kniphofia</i></h4><p>Flame-coloured spikes along streams and on damp slopes.</p><span class="where">Streams and seeps · summer</span></div></li>
+          <li class="spec"><img class="spec-photo" src="{{IMG:species/agapanthus}}" alt="Agapanthus" loading="lazy"><div><h4>Agapanthus <i>Agapanthus campanulatus</i></h4><p>Round blue heads on the grassland slopes, and a staple of the gardens along the lane.</p><span class="where">Grassland · summer</span></div></li>
+          <li class="spec"><img class="spec-photo" src="{{IMG:species/fire-lily}}" alt="Fire lily" loading="lazy"><div><h4>Fire lily <i>Cyrtanthus</i></h4><p>Bright red trumpets that push up through the blackened ground soon after a veld burn.</p><span class="where">Burnt veld · spring</span></div></li>
+          <li class="spec"><img class="spec-photo" src="{{IMG:species/everlasting}}" alt="Everlastings" loading="lazy"><div><h4>Everlastings <i>Helichrysum</i></h4><p>Papery silver and gold flowers. The Drakensberg has dozens of species.</p><span class="where">Grassland · summer and autumn</span></div></li>
+          <li class="spec"><img class="spec-photo" src="{{IMG:species/tree-fern}}" alt="Tree fern" loading="lazy"><div><h4>Tree fern <i>Cyathea dregei</i></h4><p>A sturdy grassland tree fern that survives fire, found along stream banks and in moist gullies.</p><span class="where">Stream banks · all year</span></div></li>
+        </ul></div>
+      </div>
+      <div class="guide-foot reveal">
+        <p>Keeping count? The spotter's checklist has 25 species to tick off.</p>
+        <a class="btn btn-mustard" href="../loopy-lane-spotters-checklist.pdf" download>Download the checklist <small>PDF</small></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- HISTORY -->
+  <section class="history-band" id="history">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>Under the mountain</h2>
+        <p class="lede">People have lived in these foothills for thousands of years. The village itself is young, built around a railway line and the farms it served.</p>
+      </div>
+      <ol class="path">
+        <li><span class="stone">Long ago</span><div class="txt"><h3>San hunter-gatherers</h3><p>The San painted the rock shelters of the Drakensberg, leaving one of the richest bodies of rock art in Africa. Many sites are protected and can be visited only with a guide.</p></div></li>
+        <li><span class="stone">1800s</span><div class="txt"><h3>Farms in the foothills</h3><p>Settler families took up farms in the high grasslands below the escarpment, raising cattle and sheep on the summer grazing.</p></div></li>
+        <li><span class="stone">1917</span><div class="txt"><h3>The railway and the village</h3><p>A branch line from Pietermaritzburg reached the area, and Underberg grew up around its terminus as the trading centre for the district.</p></div></li>
+        <li><span class="stone">1948</span><div class="txt"><h3>A vehicle tops Sani Pass</h3><p>The old bridle path used by pack mules into Lesotho was first driven by a Land Rover, starting its life as one of the country's best-known mountain roads.</p></div></li>
+        <li><span class="stone">2000</span><div class="txt"><h3>World Heritage listing</h3><p>The uKhahlamba-Drakensberg Park was listed by UNESCO for its scenery and rock art, later extended across the border as the Maloti-Drakensberg Park.</p></div></li>
+        <li><span class="stone">Today</span><div class="txt"><h3>Loopy Lane opens its gates</h3><p>Gardeners on the lane open their gardens to visitors during the November Open Gardens weekend, raising money for local charities.</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- SEASONS -->
+  <section class="seasons-band" id="seasons">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>Four seasons on the lane</h2>
+        <p class="lede">Underberg sits high enough for frost in winter and green, stormy afternoons in summer.</p>
+      </div>
+      <div class="season-tabs" role="tablist" aria-label="Seasons">
+        <button class="btn" role="tab" aria-selected="true" aria-controls="p-summer" id="t-summer">Summer</button>
+        <button class="btn" role="tab" aria-selected="false" aria-controls="p-autumn" id="t-autumn">Autumn</button>
+        <button class="btn" role="tab" aria-selected="false" aria-controls="p-winter" id="t-winter">Winter</button>
+        <button class="btn" role="tab" aria-selected="false" aria-controls="p-spring" id="t-spring">Spring</button>
+      </div>
+      <div class="season-panel show" id="p-summer" role="tabpanel" aria-labelledby="t-summer"><img class="season-photo" src="{{IMG:summer}}" alt="Morning mist filling the valleys below the Drakensberg" loading="lazy"><div class="season-copy"><span class="months">November – February</span><h3>Green and growing</h3><ul><li>Lush grassland and wildflowers along the verges</li><li>Open Gardens weekend in November</li><li>Warm mornings, with thunderstorms most afternoons</li></ul></div></div>
+      <div class="season-panel" id="p-autumn" role="tabpanel" aria-labelledby="t-autumn" hidden><img class="season-photo" src="{{IMG:autumn}}" alt="Golden morning light on the cliffs at Sehlabathebe, above Bushman&#x27;s Nek" loading="lazy"><div class="season-copy"><span class="months">March – May</span><h3>Golden and clear</h3><ul><li>Settled weather and long views to the escarpment</li><li>Grass turns gold and the poplars and willows colour up</li><li>Good walking and fishing weather</li></ul></div></div>
+      <div class="season-panel" id="p-winter" role="tabpanel" aria-labelledby="t-winter" hidden><img class="season-photo" src="{{IMG:winter}}" alt="Snow across the Drakensberg escarpment, seen from the air" loading="lazy"><div class="season-copy"><span class="months">June – August</span><h3>Frost and snow on the Berg</h3><ul><li>Crisp, sunny days and hard frosts at night</li><li>Snow on the peaks after cold fronts; Sani Pass can close</li><li>Fireside evenings and the clearest skies of the year</li></ul></div></div>
+      <div class="season-panel" id="p-spring" role="tabpanel" aria-labelledby="t-spring" hidden><img class="season-photo" src="{{IMG:spring}}" alt="A Drakensberg protea in flower" loading="lazy"><div class="season-copy"><span class="months">September – October</span><h3>Fresh green after the burn</h3><ul><li>New grass pushes through the winter firebreaks</li><li>Blossom in the gardens and birds returning</li><li>Windy days, with the first rains arriving</li></ul></div></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <svg class="hedge" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 60 V34 C30 10 60 10 90 30 C120 6 160 6 190 28 C220 8 255 8 285 30 C320 6 360 6 390 30 C420 10 455 10 485 30 C520 4 560 6 590 30 C620 10 655 10 685 30 C720 6 760 6 790 30 C820 10 855 10 885 30 C920 6 960 6 990 30 C1020 10 1055 10 1085 30 C1120 6 1160 6 1190 30 C1220 10 1255 10 1285 30 C1320 6 1360 6 1390 30 C1410 18 1430 18 1440 26 V60Z" fill="var(--hedge)"/>
+  </svg>
+  <div class="wrap">
+    <span class="foot-logo" role="img" aria-label="Loopy Lane"></span>
+    <small>Loopy Lane · Underberg · KwaZulu-Natal · South Africa &nbsp;·&nbsp; <a href="../" data-style="classic" class="foot-switch">See the classic style</a></small>
+    <details><summary>Photo credits</summary><ul><li>Sani Pass: <a href="https://commons.wikimedia.org/wiki/File:Sani_Pass_heading_into_Lesotho.jpg">Vaiz Ha</a>, <a href="https://creativecommons.org/licenses/by/2.0">CC BY 2.0</a></li><li>Wattled crane: <a href="https://commons.wikimedia.org/wiki/File:Wattled_crane_(Grus_carunculata)_displaying_wings.jpg">Charles J. Sharp</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li><li>Autumn: <a href="https://commons.wikimedia.org/wiki/File:Early_Morning_view_from_Sehlabathebe_House_-_panoramio.jpg">Graham Maclachlan</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0">CC BY-SA 3.0</a></li><li>Winter: <a href="https://commons.wikimedia.org/wiki/File:Drakkensburg_winter.jpg">GrantsJ1</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li><li>Spring: <a href="https://commons.wikimedia.org/wiki/File:Protea_dracomontana_59376241.jpg">Peter Warren</a>, <a href="http://creativecommons.org/publicdomain/zero/1.0/deed.en">CC0</a></li><li>Bearded vulture: <a href="https://commons.wikimedia.org/wiki/File:Bartgeier_Gypaetus_barbatus_closeup1_Richard_Bartz.jpg">Richard Bartz, Munich aka Makro Freak</a>, <a href="https://creativecommons.org/licenses/by-sa/2.5">CC BY-SA 2.5</a></li><li>Cape vulture: <a href="https://commons.wikimedia.org/wiki/File:Cape_vulture_2017_08_23_5935.jpg">Alandmanson</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li><li>Wattled crane: <a href="https://commons.wikimedia.org/wiki/File:Bugeranus_carunculatus_-Dierenpark_Amersfoort,_Netherlands-8a.jpg">Arjan Haverkamp</a>, <a href="https://creativecommons.org/licenses/by/2.0">CC BY 2.0</a></li><li>Bald ibis: <a href="https://commons.wikimedia.org/wiki/File:Threskiornithidae_Geronticus_calvus_1.1.jpg">NasserHalaweh</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li><li>Eland: <a href="https://commons.wikimedia.org/wiki/File:Taurotragus_oryx_qtl2.jpg">Quartl</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0">CC BY-SA 3.0</a></li><li>Grey rhebok: <a href="https://commons.wikimedia.org/wiki/File:Grey_Rhebok_(Pelea_capreolus)_(32453042900).jpg">Bernard DUPONT from FRANCE</a>, <a href="https://creativecommons.org/licenses/by-sa/2.0">CC BY-SA 2.0</a></li><li>Sugarbush: <a href="https://commons.wikimedia.org/wiki/File:Protea_caffra_caffra_109322728.jpg">Suvarna Parbhoo Mohan</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li><li>Red hot poker: <a href="https://commons.wikimedia.org/wiki/File:00_3464_Fackellilie_(Kniphofia_caulescens).jpg">W. Bulach</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li><li>Agapanthus: <a href="https://commons.wikimedia.org/wiki/File:CampanulaenTandil-dec2014.jpg">Ezarate</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li><li>Fire lily: <a href="https://commons.wikimedia.org/wiki/File:Cyrtanthus_contractus_1DS-II_4-0008.jpg">SAplants</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li><li>Everlasting: <a href="https://commons.wikimedia.org/wiki/File:Helichrysum_ecklonis,_RBGE_2010.jpg">Lokal_Profil</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0">CC BY-SA 3.0</a></li><li>Tree fern: <a href="https://commons.wikimedia.org/wiki/File:Cyathea_dregei,_Kirstenbosch.jpg">Karen Wiebe</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0">CC BY-SA 3.0</a></li></ul></details>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // The logo writes itself on the sign, one pen stroke per word
+  const hero = document.getElementById('heroLogo');
+  const strokes = [...hero.querySelectorAll('#pen path')].map(p => ({ p, len: p.getTotalLength() }));
+  const done = document.getElementById('penDone');
+  let total = 0;
+  strokes.forEach((s, i) => { if (i === 5) total += 70; s.start = total; total += s.len; s.p.style.strokeDasharray = s.len; });
+  const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const paint = d => strokes.forEach(s => { s.p.style.strokeDashoffset = s.len - Math.min(Math.max(d - s.start, 0), s.len); });
+  let raf;
+  const write = () => {
+    cancelAnimationFrame(raf);
+    let t0 = null;
+    const tick = now => {
+      if (t0 === null) { t0 = now + 350; done.style.transition = 'none'; done.style.opacity = 0; }
+      const t = Math.min(Math.max((now - t0) / 3000, 0), 1);
+      paint(ease(t) * total);
+      if (t < 1) raf = requestAnimationFrame(tick); else { done.style.transition = 'opacity .5s'; done.style.opacity = 1; }
+    };
+    raf = requestAnimationFrame(tick);
+  };
+  if (!reduce) { const go = () => document.visibilityState === 'visible' ? write() : document.addEventListener('visibilitychange', go, { once: true }); go(); }
+  hero.addEventListener('click', write);
+
+  // To-do list: tap a task to scribble it out; remembered on this device
+  const todos = [...document.querySelectorAll('#todoList button')];
+  const doneMsg = document.getElementById('todoDone');
+  let crossed = [];
+  try { crossed = JSON.parse(localStorage.getItem('loopylane-v2-todo') || '[]'); } catch (e) {}
+  const tally = () => {
+    const n = todos.filter(b => b.getAttribute('aria-pressed') === 'true').length;
+    doneMsg.textContent = n === todos.length ? 'All done. Time for a cup of tea.' : n ? `${n} of ${todos.length} done.` : '';
+  };
+  todos.forEach(b => {
+    b.setAttribute('aria-pressed', crossed.includes(b.dataset.k));
+    b.addEventListener('click', () => {
+      b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') !== 'true');
+      crossed = todos.filter(x => x.getAttribute('aria-pressed') === 'true').map(x => x.dataset.k);
+      try { localStorage.setItem('loopylane-v2-todo', JSON.stringify(crossed)); } catch (e) {}
+      tally();
+    });
+  });
+  tally();
+
+  // Places (coordinates from each listing on Google Maps)
+  const CATS = { stay: 'Stay', camp: 'Camping', eat: 'Eat & drink', do: 'Activities' };
+  const COLOR = { stay: 'var(--hedge)', camp: 'var(--mustard)', eat: 'var(--brick)', do: 'var(--pond-2)' };
+  const PLACES = [
+    { name: 'Rougham Rocks Campsite', cat: 'camp', lat: -29.9107882, lng: 29.392174, text: 'A campsite out in the hills at the southern end of the loop.' },
+    { name: 'Valley Lakes', cat: 'stay', lat: -29.8994597, lng: 29.2739843, text: 'Self-catering accommodation in the valley towards Bushman\'s Nek.' },
+    { name: 'Swallow Cliff Hall', cat: 'stay', lat: -29.8681875, lng: 29.2686875, text: 'Country accommodation in the western valley, close to the mountains.' },
+    { name: 'Bergview Farm Cottage', cat: 'stay', lat: -29.8588734, lng: 29.2606385, text: 'A farm cottage looking out towards the Berg.' },
+    { name: 'Pig and Pony', cat: 'eat', lat: -29.8530326, lng: 29.2306876, text: 'Country restaurant near Bushman\'s Nek, a favourite stop for campers and riders nearby.' },
+    { name: 'Silverstreams Caravan Park', cat: 'camp', lat: -29.844842, lng: 29.213965, text: 'Riverside caravan and camping park beside the Bushman\'s Nek border post, with trout in the river.' },
+    { name: 'Farraway Farm', cat: 'stay', lat: -29.8300257, lng: 29.3269493, text: 'Farm stay with Shepherd\'s Cottage and Hilltop Cottage.' },
+    { name: 'Rivervilla Cottages', cat: 'stay', lat: -29.841671, lng: 29.323422, text: 'Self-catering cottages in the middle of the loop.' },
+    { name: 'Penwarn Farm', cat: 'stay', lat: -29.8585429, lng: 29.3465612, text: 'Farm accommodation on the southern side of the loop.' },
+    { name: 'Dragons Landing', cat: 'do', lat: -29.8323481, lng: 29.3860122, text: 'Guest farm offering horse trails through the foothills.' },
+    { name: 'Drakensberg Soaring Club', cat: 'do', lat: -29.8114727, lng: 29.3979898, text: 'The local gliding club, flying over the valley with the Berg as a backdrop.' },
+    { name: 'Stoneyhall Farm', cat: 'stay', lat: -29.8057658, lng: 29.3547823, text: 'Farm accommodation on the northern side of the loop.' },
+    { name: 'Splashy Fen', cat: 'do', lat: -29.7954359, lng: 29.3443375, text: 'The farm that hosts the Splashy Fen Music Festival, held each year since 1990.' },
+    { name: 'Rose Water Lodge', cat: 'stay', lat: -29.7866721, lng: 29.3610509, text: 'Country lodge along the northern road of the loop.' },
+    { name: 'Hamstead Farm Cottage', cat: 'stay', lat: -29.7868215, lng: 29.3706405, text: 'A farm cottage along the northern road of the loop.' },
+    { name: 'Crystal Waters', cat: 'do', lat: -29.8046033, lng: 29.2487812, text: 'Trout fishing farm in the far west of the loop.' },
+    { name: 'Silo Cottage', cat: 'stay', lat: -29.7722466, lng: 29.4014247, text: 'A self-catering cottage north-west of town.' },
+    { name: 'Lamington Cabin', cat: 'stay', lat: -29.806923, lng: 29.4228196, text: 'A cabin in the farmland a short drive west of town.' },
+    { name: 'Blackbrook Farm & Cottages', cat: 'stay', lat: -29.7922345, lng: 29.4322607, text: 'A farm with cottages, among the first stops out of Underberg.' },
+    { name: 'Clearbrook Cottages', cat: 'stay', lat: -29.7674366, lng: 29.4385862, text: 'Cottages just north-west of Underberg village.' },
+    { name: 'The Tin Shack', cat: 'stay', lat: -29.8304905, lng: 29.4506768, text: 'Accommodation south-west of town, at the eastern end of the loop.' },
+    { name: 'Fourwinds Country Cottage', cat: 'stay', lat: -29.8335653, lng: 29.4494573, text: 'A country cottage south-west of town, at the eastern end of the loop.' },
+    // The resort, its restaurant and its spa share one address; their pins are offset ~100 m so each can be tapped
+    { name: 'Bushmans Nek Berg and Trout Resort', cat: 'stay', lat: -29.849, lng: 29.234, text: 'Mountain resort near the Bushman\'s Nek border post, at the western end of the loop.' },
+    { name: 'The Bush Pot Restaurant', cat: 'eat', lat: -29.8480, lng: 29.2352, text: 'Restaurant at the Bushmans Nek Berg and Trout Resort.' },
+    { name: 'La Vita Spa', cat: 'do', lat: -29.8500, lng: 29.2352, text: 'Spa at the Bushmans Nek Berg and Trout Resort.' },
+    { name: 'Bushmans Nek Hiking Gate', cat: 'do', lat: -29.844, lng: 29.2125, text: 'Ezemvelo KZN Wildlife gate into the Maloti-Drakensberg Park, the starting point for hikes towards the escarpment.' },
+    { name: 'Pear Tree Cottage', cat: 'stay', lat: -29.899, lng: 29.2755, text: 'A cottage in the south-west of the loop, near Valley Lakes.' },
+    { name: 'XL Farm Cottages', cat: 'stay', lat: -29.824, lng: 29.358, text: 'Farm cottages on Overview Farm, in the middle of the loop.' },
+    { name: 'Riverlea Farm', cat: 'do', lat: -29.772, lng: 29.423, text: 'A farm listed for trout fishing, just north-west of town.' },
+    { name: 'Pennygum Country Cottages', cat: 'stay', lat: -29.762, lng: 29.456, text: 'Country cottages a short drive north-west of Underberg village.' }
+  ];
+  const TOWN = { lat: -29.7935, lng: 29.4945 };
+  const DIRS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'], rad = d => d * Math.PI / 180;
+  PLACES.forEach((p, i) => {
+    p.i = i;
+    const dLat = rad(p.lat - TOWN.lat), dLng = rad(p.lng - TOWN.lng);
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(rad(TOWN.lat)) * Math.cos(rad(p.lat)) * Math.sin(dLng / 2) ** 2;
+    p.km = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const b = (Math.atan2(Math.sin(dLng) * Math.cos(rad(p.lat)), Math.cos(rad(TOWN.lat)) * Math.sin(rad(p.lat)) - Math.sin(rad(TOWN.lat)) * Math.cos(rad(p.lat)) * Math.cos(dLng)) * 180 / Math.PI + 360) % 360;
+    p.dir = DIRS[Math.round(b / 45) % 8];
+    p.url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.name + ' Underberg');
+  });
+  const list = document.getElementById('placeList'), detail = document.getElementById('placeDetail'), detailLink = document.getElementById('detailMapLink');
+  let lmap = null;
+  if (window.L) {
+    lmap = L.map('realMap', { scrollWheelZoom: false, zoomSnap: .25 });
+    lmap.attributionControl.setPrefix('<a href="https://leafletjs.com">Leaflet</a>');
+    const streets = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' });
+    const terrain = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17, attribution: 'Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, SRTM · Style © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)' });
+    streets.addTo(lmap);
+    L.control.layers({ 'Village map': streets, Terrain: terrain }, null, { position: 'topright' }).addTo(lmap);
+    const bounds = L.latLngBounds(PLACES.concat(TOWN).map(p => [p.lat, p.lng]));
+    const fit = () => lmap.fitBounds(bounds, lmap.getSize().x < 500 ? { padding: [18, 18] } : { paddingTopLeft: [30, 40], paddingBottomRight: [120, 30] });
+    fit();
+    const live = () => { document.getElementById('mapFrame').classList.add('live'); lmap.invalidateSize(); fit(); };
+    streets.once('tileload', live); terrain.once('tileload', live);
+    lmap.on('focus click', () => lmap.scrollWheelZoom.enable()); lmap.on('blur mouseout', () => lmap.scrollWheelZoom.disable());
+    L.marker([TOWN.lat, TOWN.lng], { icon: L.divIcon({ className: 'ltown', html: '<span></span>', iconSize: [18, 18] }), keyboard: false })
+      .bindTooltip('Underberg village', { className: 'ltip', permanent: true, direction: innerWidth < 600 ? 'left' : 'right', offset: innerWidth < 600 ? [-10, 0] : [10, 0] }).addTo(lmap);
+    PLACES.forEach(p => {
+      p.marker = L.marker([p.lat, p.lng], { title: p.name, icon: L.divIcon({ className: 'lpin', html: `<span style="--c:${COLOR[p.cat]}"></span>`, iconSize: [20, 20] }) })
+        .bindTooltip(p.name, { className: 'ltip', direction: 'top', offset: [0, -12] }).on('click', () => select(p.i)).addTo(lmap);
+    });
+  }
+  [...PLACES].sort((a, b) => a.name.localeCompare(b.name)).forEach(p => {
+    const li = document.createElement('li');
+    li.innerHTML = `<button type="button" style="--c:${COLOR[p.cat]}"><span class="dot"></span><span>${p.name}</span><span class="d">${p.km.toFixed(1)} km</span></button>`;
+    li.firstChild.addEventListener('click', () => select(p.i));
+    p.li = li; list.appendChild(li);
+  });
+  let current = PLACES.findIndex(p => p.name === 'Splashy Fen');
+  function select(i) {
+    if (PLACES[current].marker) { PLACES[current].marker.getElement()?.classList.remove('active'); PLACES[current].marker.closeTooltip(); }
+    current = i; const p = PLACES[i];
+    if (p.marker) { p.marker.getElement()?.classList.add('active'); p.marker.setZIndexOffset(1000).openTooltip(); if (!lmap.getBounds().pad(-.1).contains(p.marker.getLatLng())) lmap.panTo(p.marker.getLatLng()); }
+    PLACES.forEach(q => q.li.firstChild.classList.toggle('active', q === p));
+    detail.style.setProperty('--c', COLOR[p.cat]);
+    detail.innerHTML = `<span class="meta">${CATS[p.cat]} · ${p.km.toFixed(1)} km ${p.dir} of Underberg</span><h3>${p.name}</h3><p>${p.text}</p>`;
+    detailLink.href = p.url; detailLink.setAttribute('aria-label', `Open ${p.name} in Google Maps`);
+  }
+  select(current);
+  const chips = document.querySelectorAll('.chip');
+  chips.forEach(c => c.addEventListener('click', () => {
+    chips.forEach(x => x.setAttribute('aria-pressed', x === c));
+    PLACES.forEach(p => {
+      const show = c.dataset.f === 'all' || p.cat === c.dataset.f;
+      p.li.hidden = !show;
+      if (p.marker) { if (show) p.marker.addTo(lmap); else p.marker.remove(); }
+    });
+    if (PLACES[current].li.hidden) { const first = PLACES.find(p => !p.li.hidden); if (first) select(first.i); }
+  }));
+
+  // Style switch: remember the choice and keep the reader's place
+  document.querySelectorAll('a[data-style]').forEach(a => a.addEventListener('click', e => {
+    e.preventDefault();
+    try { localStorage.setItem('loopylane-style', a.dataset.style); } catch (err) {}
+    const ids = [...document.querySelectorAll('main section[id]')].filter(s => s.getBoundingClientRect().top < innerHeight * .35).map(s => s.id);
+    let id = ids.pop() || '';
+    if (id === 'todo' && a.dataset.style === 'classic') id = 'map';
+    location.href = a.getAttribute('href') + (id ? '#' + id : '');
+  }));
+
+  // Season tabs
+  const tabs = document.querySelectorAll('[role="tab"]');
+  tabs.forEach(tab => tab.addEventListener('click', () => tabs.forEach(t => {
+    const on = t === tab, panel = document.getElementById(t.getAttribute('aria-controls'));
+    t.setAttribute('aria-selected', on); panel.hidden = !on; panel.classList.toggle('show', on);
+  })));
+
+  // Things hop in as they scroll into view (they are visible before that)
+  if (!reduce && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });
+    document.querySelectorAll('.reveal, .card, .spec, .path li').forEach(el => io.observe(el));
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,8 +1,12 @@
-# Builds ../index.html from template.html by inlining the logo, its pen path, Leaflet's CSS and the photos.
-# Run from anywhere:  powershell -File src\build.ps1
-param([string]$Out = (Join-Path $PSScriptRoot '..\index.html'))
+# Builds a page by inlining the logo, its pen path, Leaflet's CSS and the photos into a template.
+# Run from anywhere:  powershell -File src\build.ps1                (the main site: template.html -> ../index.html)
+#                     powershell -File src\build.ps1 -Version v2   (the redesign: v2\template.html -> ../v2/index.html)
+param([string]$Version = '')
 $s = $PSScriptRoot
-$t = [IO.File]::ReadAllText("$s\template.html")
+$tpl = if ($Version) { "$s\$Version\template.html" } else { "$s\template.html" }
+$Out = if ($Version) { Join-Path $s "..\$Version\index.html" } else { Join-Path $s '..\index.html' }
+New-Item -ItemType Directory -Force (Split-Path $Out) | Out-Null
+$t = [IO.File]::ReadAllText($tpl)
 $t = $t.Replace('{{LOGO}}', 'data:image/png;base64,' + [Convert]::ToBase64String([IO.File]::ReadAllBytes("$s\logo.png")))
 $t = $t.Replace('{{PEN}}', [IO.File]::ReadAllText("$s\logo-pen-path.svg.txt"))
 $t = $t.Replace('{{LEAFLET_CSS}}', [IO.File]::ReadAllText("$s\leaflet-1.9.4.min.css"))
