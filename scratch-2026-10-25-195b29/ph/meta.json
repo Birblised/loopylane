@@ -1,0 +1,74 @@
+{
+ "sani": {
+  "title": "File:Sani Pass heading into Lesotho.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Sani_Pass_heading_into_Lesotho.jpg",
+  "artist": "Vaiz Ha",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "w": 1400,
+  "h": 930
+ },
+ "cranes": {
+  "title": "File:Wattled crane (Grus carunculata) displaying wings.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Wattled_crane_(Grus_carunculata)_displaying_wings.jpg",
+  "artist": "Charles J. Sharp",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "w": 1400,
+  "h": 934
+ },
+ "hlogoma": {
+  "title": "File:Na pola puta Underberg-Splashy Fen - panoramio.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Na_pola_puta_Underberg-Splashy_Fen_-_panoramio.jpg",
+  "artist": "Stevan.Karalic",
+  "license": "CC BY 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+  "w": 1400,
+  "h": 933
+ },
+ "garden": {
+  "title": "File:Agapanthus campanulatus kz01.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Agapanthus_campanulatus_kz01.jpg",
+  "artist": "Krzysztof Ziarnek, Kenraiz",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "w": 1400,
+  "h": 2100
+ },
+ "summer": {
+  "title": "File:SANI - Southern approach to Sani Pass, South Africa, 2017.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:SANI_-_Southern_approach_to_Sani_Pass,_South_Africa,_2017.jpg",
+  "artist": "Josep M. Gracia",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "w": 1400,
+  "h": 930
+ },
+ "autumn": {
+  "title": "File:Early Morning view from Sehlabathebe House - panoramio.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Early_Morning_view_from_Sehlabathebe_House_-_panoramio.jpg",
+  "artist": "Graham Maclachlan",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+  "w": 1400,
+  "h": 1050
+ },
+ "winter": {
+  "title": "File:Drakkensburg winter.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Drakkensburg_winter.jpg",
+  "artist": "GrantsJ1",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "w": 1400,
+  "h": 1867
+ },
+ "spring": {
+  "title": "File:Protea dracomontana 59376241.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Protea_dracomontana_59376241.jpg",
+  "artist": "Peter Warren",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "w": 1400,
+  "h": 1185
+ }
+}
