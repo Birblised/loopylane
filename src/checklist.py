@@ -14,7 +14,7 @@ OUT = os.path.join(HERE, '..', 'loopy-lane-spotters-checklist.pdf')
 PINE, SAGE, OCHRE, RUST, SLATE = (HexColor(c) for c in ('#1D3322', '#5C6F57', '#A67B4C', '#7B3E23', '#4E5D6A'))
 INK, LINE, CREAM, PAPER = HexColor('#1D2A21'), HexColor('#D9CFB4'), HexColor('#F1E9D3'), HexColor('#FBF8F0')
 
-for name, file in (('Petrona', 'Petrona.ttf'), ('Aleo', 'Aleo.ttf'), ('Aleo-Italic', 'Aleo-Italic.ttf'), ('Nunito', 'Nunito.ttf')):
+for name, file in (('Petrona', 'Petrona-SemiBold.ttf'), ('Nunito', 'Nunito-Regular.ttf'), ('Nunito-SemiBold', 'Nunito-SemiBold.ttf'), ('Nunito-Italic', 'Nunito-Italic-Regular.ttf')):
     pdfmetrics.registerFont(TTFont(name, os.path.join(HERE, 'fonts', file)))
 
 # (common name, scientific name, where and when)
@@ -68,7 +68,7 @@ def header(c, first):
         c.drawRightString(W - M, H - 27 * mm, 'UNDERBERG  ·  SOUTHERN DRAKENSBERG  ·  KWAZULU-NATAL')
         c.setStrokeColor(OCHRE); c.setLineWidth(1.4); c.line(M, H - 39 * mm, W - M, H - 39 * mm)
         y = H - band - 9 * mm
-        c.setFillColor(SLATE); c.setFont('Aleo', 9.5)
+        c.setFillColor(SLATE); c.setFont('Nunito', 9.5)
         c.drawString(M, y, 'Tick what you spot and note where and when. Fill it in on your phone, or print it for the car.')
         y -= 17 * mm
         form = c.acroForm
@@ -108,9 +108,9 @@ def build():
             count += 1
             c.acroForm.checkbox(name=f'seen_{count}', tooltip=f'Seen: {name}', x=M, y=y - 0.6 * mm, size=4.6 * mm,
                                 buttonStyle='check', borderColor=SAGE, fillColor=PAPER, textColor=PINE, borderWidth=1, forceBorder=True)
-            c.setFillColor(INK); c.setFont('Aleo', 10.5); c.drawString(M + 8 * mm, y + 1.6 * mm, name)
-            c.setFillColor(SLATE); c.setFont('Aleo-Italic', 8.5)
-            c.drawString(M + 8 * mm + pdfmetrics.stringWidth(name, 'Aleo', 10.5) + 2 * mm, y + 1.6 * mm, sci)
+            c.setFillColor(INK); c.setFont('Nunito-SemiBold', 10.5); c.drawString(M + 8 * mm, y + 1.6 * mm, name)
+            c.setFillColor(SLATE); c.setFont('Nunito-Italic', 8.5)
+            c.drawString(M + 8 * mm + pdfmetrics.stringWidth(name, 'Nunito-SemiBold', 10.5) + 2 * mm, y + 1.6 * mm, sci)
             c.setFillColor(RUST); c.setFont('Nunito', 7); c.drawString(M + 8 * mm, y - 1.6 * mm, where.upper())
             nx = W - M - 62 * mm
             c.acroForm.textfield(name=f'note_{count}', tooltip=f'Where and when: {name}', x=nx, y=y - 1 * mm, width=62 * mm, height=5.6 * mm,
